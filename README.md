@@ -15,7 +15,7 @@ TechCup es un torneo de fútbol interno de la escuela colombiana de ingeniería 
 https://github.com/nglsz006/SFC_techcup-futbol/blob/develop/SFC_TechUp_Futbol/docs/planing/manual%20identidad.md
 
 ## Mockup del Sistema
-https://www.figma.com/make/WNTggpZgFEF4BYVkYZ1XYE/Dise%C3%B1ar-interfaz-torneo-deportivo?fullscreen=1&t=GqAIgO7dSHhi9Omi-1
+https://www.figma.com/proto/RBlkiZOJCzHNZrpJdHP88Q/TECHCUP?node-id=0-1&t=Ta3y8ugEnZRvCAiL-1
 
 ## Módulos
 ### Página Principal
@@ -52,3 +52,45 @@ Se muestran los equipos inscritos al torneo por si el usuario desea ver los deta
 <img width="572" height="980" alt="image" src="https://github.com/user-attachments/assets/64fa801a-9d3c-441a-9be0-887b647e6315" />
 
 Elegir el rol para el cual se desea inciar sesión.
+
+### Registro Jugador
+<img width="1001" height="962" alt="image" src="https://github.com/user-attachments/assets/4e184589-5148-48b4-bdc6-dee74c078c19" />
+
+Registrarse como jugador.
+
+### Inicio de sesión jugador
+<img width="830" height="817" alt="image" src="https://github.com/user-attachments/assets/fc33ff00-19b5-4b66-ae65-74af7c459716" />
+
+Iniciar sesión como jugador para acceder a las funcionalidades de un usuario normal.
+
+### Registro Capitan
+<img width="917" height="967" alt="image" src="https://github.com/user-attachments/assets/44b71b41-9dd8-4774-8fdb-216fb226c7be" />
+
+Registrarse como capitan de un equipo.
+
+### Iniciar sesión como capitán
+<img width="830" height="819" alt="image" src="https://github.com/user-attachments/assets/701823c9-1aee-41c5-82d2-ea143b8b5f76" />
+
+Iniciar sesión como capitán para acceder a las funcionalidades especializadas para los usuarios y ademas para poder crear un equipo.
+
+### Inicio de sesión como organizador
+<img width="831" height="819" alt="image" src="https://github.com/user-attachments/assets/3d84982e-4da3-47fe-ac0e-7ce4a13d0b45" />
+
+Iniciar sesión como organizador para acceder a todas las datos y funcionalidades internas de la página del torneo.
+
+### Inicio de sesión como arbitro
+<img width="829" height="815" alt="image" src="https://github.com/user-attachments/assets/2184c942-ebff-427f-bc63-6247f01587e2" />
+
+Iniciar sesión como árbitro para poder subir los resultados de los partidos y ver el horario de los partidos.
+
+### Vista de Capitán
+<img width="905" height="780" alt="image" src="https://github.com/user-attachments/assets/8e523e5a-9eb8-4591-8053-f0b76cd37665" />
+
+Vista principal del capitán que contienen vistas y acciones rápidas para mayor facilidad.
+
+### Crear perfil de capitán
+<img width="905" height="1002" alt="image" src="https://github.com/user-attachments/assets/75819f32-f74b-4343-8e70-ef25b361ee03" />
+
+El capitán crea su perfil para mejor identificación y facilidad al momento de reconocer e inscribir a su equipo.
+
+
