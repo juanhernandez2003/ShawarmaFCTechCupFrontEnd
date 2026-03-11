@@ -93,4 +93,49 @@ Vista principal del capitán que contienen vistas y acciones rápidas para mayor
 
 El capitán crea su perfil para mejor identificación y facilidad al momento de reconocer e inscribir a su equipo.
 
+### Vista Organizador
+<img width="1062" height="951" alt="image" src="https://github.com/user-attachments/assets/362b08cf-cf31-4f43-867d-871de4823fd1" />
+
+La vista de organizador muestra una perspectiva general de los torneos y aspectos administrativos como lo pueden ser los pagos y aspectos que no estan a la vista de las demas personas.
+
+### Crear nuevo torneo
+<img width="1061" height="947" alt="image" src="https://github.com/user-attachments/assets/fa0d10a0-37e8-42af-90a2-09e703f6a1c0" />
+
+La vista de crear nuevo torneo solicita los datos referentes a las especificaciones del torneo a crear para poder proseguir.
+
+### Consulta de torneo
+<img width="1062" height="911" alt="image" src="https://github.com/user-attachments/assets/af86a70a-eaaa-4bd9-a101-760c9abff068" />
+
+Permite ver los torneos en curso y editar su estado dependiendo del transcurso de cada uno de ellos.
+
+### Configuración del torneo
+<img width="1364" height="997" alt="image" src="https://github.com/user-attachments/assets/6d414c46-bd32-423e-9ce9-3c97a20bdf75" />
+
+Permite editar las especificaciones generales del torneo que van a estar en su mayoría a la vista de los jugadores para que las tengan presentes (Reglamento, horarios, canchas de partidos y sanciones).
+
+### Revisión de pagos
+<img width="1364" height="816" alt="image" src="https://github.com/user-attachments/assets/2ac59002-392b-49b8-b35d-1e8ae3f57193" />
+
+Permite al administrador revisar, aceptar y rechazar los pagos que van haciendo los equipos para realizar su inscripción.
+
+### Registro de partidos
+<img width="1130" height="1001" alt="image" src="https://github.com/user-attachments/assets/e0766856-6f0a-4763-851d-0aa745924fe0" />
+
+Le permite al administrador registrar los resultados y estadísticas de los partidos que se van acabando, esto a partir de los datos que suministra el arbitro desde su cuenta.
+
+### Reglamento del torneo
+<img width="845" height="1006" alt="image" src="https://github.com/user-attachments/assets/d170e12d-41e1-4737-8225-7db0abedb754" />
+
+Le permite a los jugadores revisar el reglamento del torneo que fue registrado en primera instancia por el organizador al crear el torneo.
+
+### Alineaciones del partido
+<img width="1014" height="1000" alt="image" src="https://github.com/user-attachments/assets/fe1cd552-fe7c-48ee-9e8d-239638c54e52" />
+
+Le permite al árbitro revisar las alineaciones del partido para ver nombres y números de jugadores que estan en el campo.
+
+### Panel de control del árbitro
+<img width="1013" height="930" alt="image" src="https://github.com/user-attachments/assets/7cbd5764-95b4-473c-8ecd-dc2b8afcc4bc" />
+
+Le permite al árbitro ver sus partidos asignados, los que ya arbitró y los que tiene aun programados, aso como las notificaciones de la asignación de partidos que se le van dando en el momento.
+
 
