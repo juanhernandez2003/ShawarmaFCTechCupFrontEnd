@@ -6,8 +6,5 @@
 
 ## Descripción
 
-Este documento contiene el enlace al diseño completo del Sprint 3 del proyecto TechCup Sistemas. El mockup incluye todas las pantallas, componentes y flujos de usuario desarrollados para esta iteración.
+Este documento contiene el enlace al diseño completo del Sprint 3 del proyecto TechCup Sistemas. El mockup incluye todas las pantallas, componentes y flujos de usuario desarrollados para este Sprint.
 
-## Acceso
-
-Para visualizar el diseño completo, haz clic en el enlace de Figma proporcionado arriba.
