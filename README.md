@@ -1,26 +1,26 @@
-# 🏆 TechCup Sistemas - Frontend
+# TechCup Sistemas - Frontend
 
-> Plataforma web para gestionar el torneo interno de fútbol de la Facultad de Ingeniería de Sistemas
-
----
-
-## 📋 Índice
-
-- [Manual de Identidad Visual](#-manual-de-identidad-visual)
-  - [Logotipo](#-logotipo)
-  - [Paleta de Colores](#-paleta-de-colores)
-  - [Tipografía](#-tipografía)
-  - [Componentes UI](#-componentes-ui)
-  - [Mockups](#-mockups)
-- [Público Objetivo](#-público-objetivo)
-- [Accesibilidad](#-accesibilidad)
-- [Documentación Completa](#-documentación-completa)
+Plataforma web para gestionar el torneo interno de fútbol de la Facultad de Ingeniería de Sistemas
 
 ---
 
-## 🎨 Manual de Identidad Visual
+## Índice
 
-### 🔷 Logotipo
+- [Manual de Identidad Visual](#manual-de-identidad-visual)
+  - [Logotipo](#logotipo)
+  - [Paleta de Colores](#paleta-de-colores)
+  - [Tipografía](#tipografía)
+  - [Componentes UI](#componentes-ui)
+  - [Mockups](#mockups)
+- [Público Objetivo](#público-objetivo)
+- [Accesibilidad](#accesibilidad)
+- [Documentación Completa](#documentación-completa)
+
+---
+
+## Manual de Identidad Visual
+
+### Logotipo
 
 <div align="center">
   <img src="https://github.com/user-attachments/assets/af669006-d361-4274-8c1b-1bdf8f29155d" alt="TechCup Logo" width="600"/>
@@ -31,7 +31,7 @@
 
 ---
 
-### 🎨 Paleta de Colores
+### Paleta de Colores
 
 Nuestra identidad visual utiliza **tonos verdes** que representan tecnología, innovación y entornos digitales.
 
@@ -67,35 +67,35 @@ Nuestra identidad visual utiliza **tonos verdes** que representan tecnología, i
   <img src="https://github.com/user-attachments/assets/eb2a7f97-274b-4990-a7fa-11d2243f238d" width="150"/>
 </p>
 
-**[¿Por qué estos colores?](#-accesibilidad)** → Diseñados pensando en accesibilidad y daltonismo
+**[¿Por qué estos colores?](#accesibilidad)** → Diseñados pensando en accesibilidad y daltonismo
 
 ---
 
-### ✍️ Tipografía
+### Tipografía
 
 #### Poppins - Títulos y Botones
 
 <img src="./docs/Images/ManualDeIdentidad/PoppingsHeader.PNG" alt="Poppins" width="500"/>
 
 **¿Por qué Poppins?**  
-✓ Estructura geométrica clara  
-✓ Facilita identificación de elementos importantes  
-✓ Moderna y legible en pantallas  
-✓ Perfecta para llamadas a la acción
+- Estructura geométrica clara  
+- Facilita identificación de elementos importantes  
+- Moderna y legible en pantallas  
+- Perfecta para llamadas a la acción
 
 #### Montserrat - Subtítulos y Contenido
 
 <img src="./docs/Images/ManualDeIdentidad/MonserratEje.PNG" alt="Montserrat" width="500"/>
 
 **¿Por qué Montserrat?**  
-✓ Excelente legibilidad en tamaños pequeños  
-✓ Fácil de escanear visualmente  
-✓ Versátil para diferentes contextos  
-✓ Complementa perfectamente con Poppins
+- Excelente legibilidad en tamaños pequeños  
+- Fácil de escanear visualmente  
+- Versátil para diferentes contextos  
+- Complementa perfectamente con Poppins
 
 ---
 
-### 🧩 Componentes UI
+### Componentes UI
 
 #### Elementos de Interfaz
 
@@ -110,7 +110,9 @@ Nuestra identidad visual utiliza **tonos verdes** que representan tecnología, i
 
 ---
 
-### 📱 Mockups
+### Mockups
+
+**[Ver Mockup Completo](./docs/mockup-sprint-3.md)** - Diseño completo en Figma del Sprint 3
 
 #### Página Principal
 
@@ -134,30 +136,30 @@ Nuestra identidad visual utiliza **tonos verdes** que representan tecnología, i
 
 ---
 
-## 👥 Público Objetivo
+## Público Objetivo
 
 ### Usuarios Principales (16-30 años)
 
-🎮 **Jugadores**  
+**Jugadores**  
 Participantes activos del torneo que consultan horarios, equipos y estadísticas
 
-👨‍✈️ **Capitanes**  
+**Capitanes**  
 Líderes de equipo que gestionan alineaciones e invitaciones
 
-📊 **Organizadores**  
+**Organizadores**  
 Administradores que configuran torneos y gestionan partidos
 
-⚽ **Árbitros**  
+**Árbitros**  
 Oficiales que consultan partidos asignados y registran resultados
 
 ### Usuarios Secundarios (25-50 años)
 
-👨‍👩‍👧‍👦 **Familiares y Visitantes**  
+**Familiares y Visitantes**  
 Personas interesadas en seguir el torneo y revisar resultados
 
 ---
 
-## ♿ Accesibilidad
+## Accesibilidad
 
 ### Diseño Inclusivo para Daltonismo
 
@@ -165,31 +167,33 @@ Personas interesadas en seguir el torneo y revisar resultados
 
 #### Estrategias Implementadas
 
-✅ **Iconos + Texto**  
+**Iconos + Texto**  
 Cada botón combina símbolo visual con etiqueta escrita
 
-✅ **Estados con Etiquetas**  
+**Estados con Etiquetas**  
 "Activo", "Rechazado", "Pendiente" siempre tienen texto
 
-✅ **Contraste de Brillo**  
+**Contraste de Brillo**  
 Las divisiones usan diferencias de luminosidad, no solo color
 
 #### Colores Seguros
 
-🔵 **Azul** - Universal, visible para todos los tipos de daltonismo  
-🟡 **Amarillo/Naranja** - Alto brillo, distinguible por luminosidad  
-🟢 **Verde Oscuro** - Contraste fuerte sobre fondos claros  
-🔴 **Rojo** - Siempre acompañado de texto descriptivo
+**Azul** - Universal, visible para todos los tipos de daltonismo  
+**Amarillo/Naranja** - Alto brillo, distinguible por luminosidad  
+**Verde Oscuro** - Contraste fuerte sobre fondos claros  
+**Rojo** - Siempre acompañado de texto descriptivo
 
 **Resultado:** Plataforma usable para personas con cualquier tipo de daltonismo
 
 ---
 
-## 📚 Documentación Completa
+## Documentación Completa
 
-📄 **[Manual de Identidad Completo](./docs/planing/manual%20identidad.md)**  
+**[Manual de Identidad Completo](./docs/planing/manual%20identidad.md)**  
 Documentación detallada con especificaciones técnicas y guías de uso
 
-🎨 **[Recursos Visuales](./docs/Images/ManualDeIdentidad/)**  
+**[Recursos Visuales](./docs/Images/ManualDeIdentidad/)**  
 Imágenes, mockups y assets del proyecto
 
+**[Mockup Sprint 3](./docs/mockup-sprint-3.md)**  
+Diseño completo en Figma
