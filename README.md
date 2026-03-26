@@ -193,38 +193,3 @@ Documentación detallada con especificaciones técnicas y guías de uso
 🎨 **[Recursos Visuales](./docs/Images/ManualDeIdentidad/)**  
 Imágenes, mockups y assets del proyecto
 
----
-
-## 🚀 Tecnologías
-
-- **React** 19.2.0
-- **Vite** 7.3.1
-- **ESLint** 9.39.1
-
----
-
-## 💻 Instalación y Uso
-
-```bash
-# Instalar dependencias
-npm install
-
-# Servidor de desarrollo
-npm run dev
-
-# Build de producción
-npm run build
-
-# Preview del build
-npm run preview
-
-# Linter
-npm run lint
-```
-
----
-
-<div align="center">
-  <p><strong>TechCup Sistemas</strong> - Donde la tecnología se encuentra con el deporte 🏆⚽</p>
-  <p><em>Diseñado con ❤️ para la Facultad de Ingeniería de Sistemas</em></p>
-</div>
