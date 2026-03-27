@@ -1,27 +1,22 @@
-# Shawarma FC Tech Cup Frontend
+# Manual de Identidad Visual
 
-This is the README file for the Shawarma FC Tech Cup Frontend project.
+## Logotipo
+[Contenido original del Logotipo]
 
-## Documentation
+## Paleta de Colores
+[Contenido original de la Paleta de Colores]
 
-For detailed documentation, please refer to [Documentation Link](link_to_documentation).
+## Tipografía
+[Contenido original de la Tipografía]
 
-## Installation
+## Componentes UI
+[Contenido original de los Componentes UI]
 
-Instructions for installing the project...
+## Mockups
+[Contenido original de Mockups]
 
-## Usage
+## Documentación Completa
+[Contenido original de Documentación Completa]
 
-Instructions for using the project...
-
-## Contributing
-
-Instructions for contributing to the project...
-
-## License
-
-Specify the license of the project...
-
-## Index
-
-- [Documentation](link_to_documentation)
+## Ver Público Objetivo y Accesibilidad
+[Ver Público Objetivo y Accesibilidad](./docs/publico-objetivo-y-accesibilidad.md)
