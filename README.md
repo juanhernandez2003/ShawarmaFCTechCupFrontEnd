@@ -66,7 +66,7 @@ Nuestra identidad visual utiliza **tonos verdes** que representan tecnología, i
   <img src="https://github.com/user-attachments/assets/eb2a7f97-274b-4990-a7fa-11d2243f238d" width="150"/>
 </p>
 
-**[¿Por qué estos colores?](#accesibilidad)** → Diseñados pensando en accesibilidad y daltonismo
+**[¿Por qué estos colores?](./docs/planing/colores-accesibilidad.md)** → Diseñados pensando en accesibilidad y daltonismo
 
 ---
 
