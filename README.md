@@ -92,6 +92,16 @@ Nuestra identidad visual utiliza **tonos verdes** que representan tecnología, i
 - Versátil para diferentes contextos  
 - Complementa perfectamente con Poppins
 
+#### Inria Serif - Descripción pagina
+
+<img width="614" height="254" alt="image" src="https://github.com/user-attachments/assets/63ab0ee5-a5dc-417f-ac3b-bf91c24ab937" />
+
+**¿Por qué Inria Serif?**
+- es clara y diferenciada para leer la descripción
+- delgada que permite el conrtaste con las otras letras
+- atrae al visitante
+
+
 ---
 
 ### Componentes UI
