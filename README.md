@@ -14,6 +14,7 @@ Plataforma web para gestionar el torneo interno de fútbol de la Facultad de Ing
   - [Mockups](#mockups)
 - [Público Objetivo y accesibilidad](#público-objetivo-y-accesibilidad)
 - [Documentación Completa](#documentación-completa)
+- [Flujo completo](#flujo-completo)
 
 ---
 
