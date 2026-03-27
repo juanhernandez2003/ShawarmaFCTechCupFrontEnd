@@ -156,9 +156,6 @@ Explicación detallada de por que escogimos esos colores, simbolos,y todas las c
 
 ## Documentación Completa
 
-**[Manual de Identidad Completo](./docs/planing/manual%20identidad.md)**  
-Documentación detallada con especificaciones técnicas y guías de uso
-
 **[Recursos Visuales](./docs/Images/ManualDeIdentidad/)**  
 Imágenes, mockups y assets del proyecto
 
