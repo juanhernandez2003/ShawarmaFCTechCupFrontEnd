@@ -115,23 +115,35 @@ Nuestra identidad visual utiliza **tonos verdes** que representan tecnología, i
 
 #### Página Principal
 
-<img src="./docs/Images/ManualDeIdentidad/PaginaPrincipal.PNG" alt="Página Principal" width="700"/>
+<img width="364" height="660" alt="image" src="https://github.com/user-attachments/assets/36353e68-1676-4971-9405-1ca3f4e770af" />
+
 
 **Características:**
-- Hero section con llamada a la acción clara
+- llamada a la acción clara
 - Navegación intuitiva
 - Diseño responsive
-- Jerarquía visual definida
+- Jerarquía visual definida y mas amena
 
-#### Registro de Usuario
+#### Registro de Usuario Institucional
 
-<img src="./docs/Images/ManualDeIdentidad/Registro.PNG" alt="Registro" width="700"/>
+<img width="528" height="575" alt="image" src="https://github.com/user-attachments/assets/4fa6551a-5379-4ba4-b4bf-85bff73e63c5" />
+
 
 **Características:**
-- Formulario limpio y organizado
 - Validación en tiempo real
 - Feedback visual claro
-- Proceso simplificado
+- Proceso simplificado por rol
+
+#### Inicio de sesión
+
+<img width="477" height="520" alt="image" src="https://github.com/user-attachments/assets/a5cf7f13-25cc-41e2-aff9-dba0e43f5d39" />
+
+
+**Características:**
+- Ubicación de los roles
+- Diseño amable con el usuario
+- Facil accesibilidad
+
 
 ---
 ## Público objetivo y accesibilidad
