@@ -163,6 +163,9 @@ Imágenes, mockups y assets del proyecto
 **[Mockup Sprint 3](./docs/mockup-sprint-3.md)**  
 Diseño completo en Figma
 
+## Link Repositorio TechCup Backend
+https://github.com/nglsz006/SFC_techcup-futbol
+
 ---
 
 ## Flujo completo
