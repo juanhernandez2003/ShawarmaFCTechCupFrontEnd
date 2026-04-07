@@ -1,11 +1,10 @@
 import { create } from 'zustand'
 
 interface User {
-  id: number
-  nombre: string
   correo: string
   rol: string
 }
+
 interface AuthState {
   token: string | null
   user: User | null
@@ -31,7 +30,7 @@ const useAuthStore = create<AuthState>(set => ({
   },
 
   isAuthenticated: () => {
-    return !!localStorage.getItem('token')
+    return localStorage.getItem('token') !== null
   },
 }))
 

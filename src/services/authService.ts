@@ -1,23 +1,27 @@
-import axios from 'axios'
+import apiClient from './apiClient'
 
 export interface LoginRequest {
-  correo: string
-  contraseña: string
+  email: string
+  password: string
 }
 
 export interface LoginResponse {
   token: string
-  user: {
-    id: number
-    nombre: string
-    correo: string
-    rol: string
-  }
 }
 
-const API_URL = import.meta.env.VITE_API_URL
+export interface DecodedToken {
+  sub: string
+  rol: string
+  iat: number
+  exp: number
+}
 
-export const login = async (credentials: LoginRequest): Promise<LoginResponse> => {
-  const response = await axios.post<LoginResponse>(`${API_URL}/auth/login`, credentials)
+export const decodeToken = (token: string): DecodedToken => {
+  const payload = token.split('.')[1]
+  return JSON.parse(atob(payload)) as DecodedToken
+}
+
+export const login = async (data: LoginRequest): Promise<LoginResponse> => {
+  const response = await apiClient.post<LoginResponse>('/api/access/login', data)
   return response.data
 }

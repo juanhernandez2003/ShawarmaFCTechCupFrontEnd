@@ -1,6 +1,8 @@
 import { useState, type FormEvent, type ChangeEvent, type CSSProperties } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import PageHeader from '../components/common/PageHeader'
+import { login, decodeToken } from '../services/authService'
+import useAuthStore from '../store/authStore'
 
 interface FormErrors {
   correo: string
@@ -30,6 +32,10 @@ export default function LoginPage() {
   const [recordarme, setRecordarme] = useState<boolean>(false)
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [submitted, setSubmitted] = useState<boolean>(false)
+  const [errorGeneral, setErrorGeneral] = useState<string>('')
+
+  const authStore = useAuthStore()
+  const navigate = useNavigate()
 
   const erroresActivos: FormErrors = (() => {
     const e: FormErrors = { correo: '', contrasena: '' }
@@ -42,14 +48,33 @@ export default function LoginPage() {
   const errores: FormErrors = submitted ? erroresActivos : { correo: '', contrasena: '' }
   const isDisabled = submitted && (erroresActivos.correo !== '' || erroresActivos.contrasena !== '')
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setSubmitted(true)
 
     if (erroresActivos.correo || erroresActivos.contrasena) return
 
     setIsLoading(true)
-    // lógica de envío pendiente
+    setErrorGeneral('')
+
+    try {
+      const response = await login({ email: correo, password: contrasena })
+      const decoded = decodeToken(response.token)
+      authStore.login(response.token, {
+        correo: decoded.sub,
+        rol: decoded.rol,
+      })
+      navigate('/dashboard')
+    } catch (error: unknown) {
+      const axiosError = error as { response?: { data?: { detalle?: string } } }
+      if (axiosError.response?.data?.detalle) {
+        setErrorGeneral(axiosError.response.data.detalle)
+      } else {
+        setErrorGeneral('Error de conexión con el servidor.')
+      }
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -164,8 +189,21 @@ export default function LoginPage() {
               cursor: isDisabled || isLoading ? 'not-allowed' : 'pointer',
             }}
           >
-            Iniciar sesión
+            {isLoading ? 'Iniciando sesión...' : 'Iniciar sesión'}
           </button>
+
+          {errorGeneral && (
+            <p
+              style={{
+                color: '#E53E3E',
+                fontSize: '0.85rem',
+                textAlign: 'center',
+                margin: '0.75rem 0 0 0',
+              }}
+            >
+              {errorGeneral}
+            </p>
+          )}
         </form>
 
         <p style={{ textAlign: 'center', marginTop: '1rem' }}>
