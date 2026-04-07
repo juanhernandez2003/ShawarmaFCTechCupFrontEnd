@@ -23,7 +23,12 @@
 hs_err_pid*
 replay_pid*
 
-node_modules
-dist
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Environment variables
 .env
 .env.local

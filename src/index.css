@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Montserrat:wght@400;500&display=swap');
 
 * {
   box-sizing: border-box;
@@ -7,7 +7,7 @@
 }
 
 :root {
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Montserrat', sans-serif;
   line-height: 1.5;
   font-weight: 400;
   font-synthesis: none;
@@ -22,6 +22,11 @@ body {
   width: 100%;
   min-height: 100vh;
   background-color: #ffffff;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.font-title {
+  font-family: 'Poppins', sans-serif;
 }
 
 a {
@@ -32,4 +37,14 @@ a {
 button {
   cursor: pointer;
   font-family: 'Poppins', sans-serif;
+  transition: border-color 0.25s;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px white inset !important;
+  -webkit-text-fill-color: #000000 !important;
+  transition: background-color 5000s ease-in-out 0s;
 }

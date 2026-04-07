@@ -47,8 +47,8 @@ const AuthLayout = ({ children }: AuthLayoutProps) => {
           flex: 1,
           backgroundColor: '#D9D9D9',
           display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
+          flexDirection: 'column',
+          alignItems: 'stretch',
         }}
       >
         {children}
