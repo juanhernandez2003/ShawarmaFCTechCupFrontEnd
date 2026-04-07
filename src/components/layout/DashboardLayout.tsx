@@ -24,7 +24,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const user = useAuthStore(state => state.user)
   const [hoveredLink, setHoveredLink] = useState<string | null>(null)
 
-  const initials = user ? getInitials(user.nombre) : '?'
+    const initials = user ? getInitials(user.correo) : '?'
   const rol = user ? user.rol : 'Invitado'
 
   return (
@@ -33,7 +33,8 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         style={{
           width: '100%',
           boxSizing: 'border-box',
-          backgroundColor: '#11823B',
+          backgroundColor: '#FFFFFF',
+          borderBottom: '1px solid #D9D9D9',
           padding: '0 2rem',
           display: 'flex',
           alignItems: 'center',
@@ -41,7 +42,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           height: '64px',
         }}
       >
-        <span style={{ fontWeight: 'bold', color: '#ffffff', fontSize: '1.1rem' }}>⚽ TECHCUP</span>
+        <span style={{ fontWeight: 'bold', color: '#11823B', fontSize: '1.1rem' }}>⚽ TECHCUP</span>
 
         <nav style={{ display: 'flex', gap: '2rem' }}>
           {navLinks.map(link => (
@@ -51,7 +52,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
               onMouseEnter={() => setHoveredLink(link.to)}
               onMouseLeave={() => setHoveredLink(null)}
               style={{
-                color: hoveredLink === link.to ? '#D9D9D9' : '#ffffff',
+                color: hoveredLink === link.to ? '#11823B' : '#000000',
                 textDecoration: 'none',
                 fontSize: '0.95rem',
               }}
@@ -67,11 +68,11 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
               width: '36px',
               height: '36px',
               borderRadius: '50%',
-              backgroundColor: '#ffffff',
+              backgroundColor: '#11823B',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: '#11823B',
+              color: '#ffffff',
               fontWeight: 'bold',
               fontSize: '0.85rem',
               flexShrink: 0,
@@ -81,8 +82,8 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           </div>
           <span
             style={{
-              backgroundColor: '#ffffff',
-              color: '#11823B',
+              backgroundColor: '#11823B',
+              color: '#ffffff',
               padding: '2px 10px',
               borderRadius: '12px',
               fontSize: '0.8rem',
