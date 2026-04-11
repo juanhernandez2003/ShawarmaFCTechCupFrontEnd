@@ -36,8 +36,8 @@ function validate(nombre: string, apellido: string, correo: string, contrasena: 
 
   if (!correo.trim()) {
     errors.correo = 'El correo es obligatorio.'
-  } else if (!correo.endsWith('@escuelaing.edu.co')) {
-    errors.correo = 'El correo debe terminar en @escuelaing.edu.co.'
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo.trim())) {
+    errors.correo = 'Ingrese un correo electrónico válido.'
   }
 
   if (!contrasena) {
@@ -184,12 +184,12 @@ export default function RegisterPage() {
           {!errores.apellido && <div style={{ marginBottom: '1rem' }} />}
 
           <label htmlFor="correo" style={labelStyle}>
-            Correo Institucional
+            Correo electrónico
           </label>
           <input
             id="correo"
             type="email"
-            placeholder="Ingrese su correo institucional"
+            placeholder="Ingrese su correo electrónico"
             value={correo}
             onChange={(e: ChangeEvent<HTMLInputElement>) => setCorreo(e.target.value)}
             style={inputStyle('correo')}
