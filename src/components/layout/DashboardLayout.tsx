@@ -30,7 +30,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     navigate('/login')
   }
 
-    const initials = user ? getInitials(user.correo) : '?'
+  const initials = user ? getInitials(user.correo) : '?'
   const rol = user ? user.rol : 'Invitado'
 
   return (
