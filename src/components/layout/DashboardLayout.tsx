@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import useAuthStore from '../../store/authStore'
 import Footer from './Footer'
 
@@ -23,8 +23,14 @@ const getInitials = (nombre: string): string => {
 const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const user = useAuthStore(state => state.user)
   const [hoveredLink, setHoveredLink] = useState<string | null>(null)
+  const navigate = useNavigate()
 
-    const initials = user ? getInitials(user.correo) : '?'
+  const handleLogout = () => {
+    useAuthStore.getState().logout()
+    navigate('/login')
+  }
+
+  const initials = user ? getInitials(user.correo) : '?'
   const rol = user ? user.rol : 'Invitado'
 
   return (
@@ -92,6 +98,22 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           >
             {rol}
           </span>
+          <button
+            onClick={handleLogout}
+            style={{
+              backgroundColor: '#11823B',
+              color: '#FFFFFF',
+              border: 'none',
+              borderRadius: '4px',
+              padding: '0.35rem 0.85rem',
+              fontSize: '0.85rem',
+              cursor: 'pointer',
+              marginLeft: '1rem',
+              fontFamily: 'Montserrat, sans-serif',
+            }}
+          >
+            Cerrar sesión
+          </button>
         </div>
       </header>
 
