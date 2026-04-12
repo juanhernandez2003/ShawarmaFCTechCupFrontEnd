@@ -26,6 +26,19 @@ const labelStyle: CSSProperties = {
   fontFamily: 'Montserrat, sans-serif',
 }
 
+const getRutaPorRol = (rol: string): string => {
+  switch (rol) {
+    case 'ADMINISTRADOR':
+      return '/dashboard'
+    case 'CAPITAN':
+      return '/equipos/registro'
+    case 'JUGADOR':
+      return '/equipos'
+    default:
+      return '/dashboard'
+  }
+}
+
 export default function LoginPage() {
   const [correo, setCorreo] = useState<string>('')
   const [contrasena, setContrasena] = useState<string>('')
@@ -64,7 +77,7 @@ export default function LoginPage() {
         correo: decoded.sub,
         rol: decoded.rol,
       })
-      navigate('/dashboard')
+      navigate(getRutaPorRol(decoded.rol))
     } catch (error: unknown) {
       const axiosError = error as { response?: { data?: { detalle?: string } } }
       if (axiosError.response?.data?.detalle) {
