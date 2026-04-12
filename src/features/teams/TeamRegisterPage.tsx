@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import axios from 'axios'
+import apiClient from '../../services/apiClient'
 import useAuthStore from '../../store/authStore'
 
 const COLORES = [
@@ -16,7 +16,7 @@ const COLORES = [
   '#ef4444',
 ]
 
-const SEMESTRES = ['Semestre 2025-2', 'Semestre 2026-1', 'Semestre 2026-2']
+const SEMESTRES = ['1', '2', '3', '4', '5', '6', '7', '8', '9']
 
 const TeamRegisterPage = () => {
   const [nombre, setNombre] = useState('')
@@ -48,21 +48,23 @@ const TeamRegisterPage = () => {
     setLoading(true)
     setErrores({})
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/api/users/captains/${user.correo}/team`,
-        null,
-        {
-          params: { nombreEquipo: nombre },
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-        }
-      )
+      const response = await apiClient.post('/api/teams', {
+        nombre,
+        escudo: '',
+        colorPrincipal,
+        colorSecundario,
+        capitanId: user.correo,
+      })
       setEquipoCreado({ id: response.data.id, nombre })
       setNombre('')
       setColorPrincipal('')
       setColorSecundario('')
       setSemestre('')
-    } catch {
-      setErrores({ general: 'Error al registrar el equipo' })
+    } catch (err: unknown) {
+      const axiosError = err as { response?: { data?: { detalle?: string } } }
+      setErrores({
+        general: axiosError.response?.data?.detalle || 'Error al registrar el equipo',
+      })
     } finally {
       setLoading(false)
     }
@@ -181,14 +183,13 @@ const TeamRegisterPage = () => {
                         borderRadius: '50%',
                         backgroundColor: c,
                         cursor: 'pointer',
-                        border:
-                          colorPrincipal === c ? '2px solid #11823B' : '2px solid transparent',
+                        border: colorPrincipal === c ? '2px solid #000' : '2px solid transparent',
                       }}
                     />
                   ))}
                 </div>
                 {errores.colorPrincipal && (
-                  <p style={{ color: '#ef4444', fontSize: '0.7rem', margin: '0.25rem 0 0' }}>
+                  <p style={{ color: '#ef4444', fontSize: '0.75rem', margin: '0.25rem 0 0' }}>
                     {errores.colorPrincipal}
                   </p>
                 )}
@@ -208,14 +209,13 @@ const TeamRegisterPage = () => {
                         borderRadius: '50%',
                         backgroundColor: c,
                         cursor: 'pointer',
-                        border:
-                          colorSecundario === c ? '2px solid #11823B' : '2px solid transparent',
+                        border: colorSecundario === c ? '2px solid #000' : '2px solid transparent',
                       }}
                     />
                   ))}
                 </div>
                 {errores.colorSecundario && (
-                  <p style={{ color: '#ef4444', fontSize: '0.7rem', margin: '0.25rem 0 0' }}>
+                  <p style={{ color: '#ef4444', fontSize: '0.75rem', margin: '0.25rem 0 0' }}>
                     {errores.colorSecundario}
                   </p>
                 )}
@@ -224,22 +224,23 @@ const TeamRegisterPage = () => {
           </div>
 
           {/* Semestre */}
-          <div style={{ marginBottom: '1.5rem' }}>
+          <div style={{ marginBottom: '1rem' }}>
             <label style={{ fontSize: '0.85rem', display: 'block', marginBottom: '0.25rem' }}>
-              Semestre de juego
+              Semestre
             </label>
             <select
               value={semestre}
               onChange={e => setSemestre(e.target.value)}
               style={{
                 width: '100%',
+                boxSizing: 'border-box',
                 padding: '0.5rem',
                 border: `1px solid ${errores.semestre ? '#ef4444' : '#D9D9D9'}`,
                 borderRadius: '4px',
                 fontSize: '0.85rem',
               }}
             >
-              <option value="">Por favor seleccione el semestre en el jugara</option>
+              <option value="">Por favor seleccione el semestre en el que jugará</option>
               {SEMESTRES.map(s => (
                 <option key={s} value={s}>
                   {s}
@@ -265,7 +266,7 @@ const TeamRegisterPage = () => {
             style={{
               width: '100%',
               padding: '0.75rem',
-              backgroundColor: '#11823B',
+              backgroundColor: loading ? '#737373' : '#11823B',
               color: '#ffffff',
               border: 'none',
               borderRadius: '4px',
@@ -274,7 +275,7 @@ const TeamRegisterPage = () => {
               marginBottom: '0.5rem',
             }}
           >
-            💾 {loading ? 'Creando...' : 'Crear equipo'}
+            {loading ? 'Creando...' : '💾 Crear equipo'}
           </button>
 
           <button
@@ -306,7 +307,7 @@ const TeamRegisterPage = () => {
                 Aún no has creado un equipo
               </p>
               <p style={{ margin: '0 0 0.5rem' }}>Cuando crees un equipo aparecerá aquí</p>
-              <p style={{ margin: '0 0 2rem' }}>!Empieza registrando tu primer equipo¡</p>
+              <p style={{ margin: '0 0 2rem' }}>¡Empieza registrando tu primer equipo!</p>
               <div style={{ fontSize: '4rem' }}>⚽</div>
             </div>
           ) : (

@@ -18,7 +18,12 @@ const emptyErrors = (): FormErrors => ({
   contrasena: '',
 })
 
-function validate(nombre: string, apellido: string, correo: string, contrasena: string): FormErrors {
+function validate(
+  nombre: string,
+  apellido: string,
+  correo: string,
+  contrasena: string
+): FormErrors {
   const errors = emptyErrors()
   const lettersOnly = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/
 
