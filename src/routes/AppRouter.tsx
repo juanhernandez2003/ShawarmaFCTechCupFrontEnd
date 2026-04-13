@@ -15,6 +15,7 @@ import TorneoDetallePage from '../features/torneos/TorneoDetallePage'
 import TablaPage from '../features/torneos/TablaPage'
 import GoleadoresPage from '../features/torneos/GoleadoresPage'
 import EquiposPage from '../features/torneos/EquiposPage'
+import CrearPerfilPage from '../features/players/CrearPerfilPage'
 
 const AppRouter = () => {
   return (
@@ -65,6 +66,7 @@ const AppRouter = () => {
           <Route path="/equipos/:id" element={<TeamDetailPage />} />
           <Route path="/equipos/registro" element={<TeamRegisterPage />} />
           <Route path="/perfil" element={<NotFoundPage />} />
+          <Route path="/perfil/crear" element={<CrearPerfilPage />} />
         </Route>
 
         {/* Ruta no encontrada */}
