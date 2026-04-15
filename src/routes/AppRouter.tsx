@@ -21,6 +21,7 @@ import AlineacionesArbitroPage from '../features/arbitro/AlineacionesArbitroPage
 import ReglamentoArbitroPage from '../features/arbitro/ReglamentoArbitroPage'
 import TablaPosicionesArbitroPage from '../features/arbitro/TablaPosicionesArbitroPage'
 import LlavesArbitroPage from '../features/arbitro/LlavesArbitroPage'
+import PartidosArbitroPage from '../features/arbitro/PartidosArbitroPage'
 
 const AppRouter = () => {
   return (
@@ -75,6 +76,7 @@ const AppRouter = () => {
           }
         >
           <Route path="/arbitro" element={<ArbitroPanelPage />} />
+          <Route path="/arbitro/partidos" element={<PartidosArbitroPage />} />
           <Route path="/arbitro/alineaciones" element={<AlineacionesArbitroPage />} />
           <Route path="/arbitro/reglamento" element={<ReglamentoArbitroPage />} />
           <Route path="/arbitro/tabla" element={<TablaPosicionesArbitroPage />} />

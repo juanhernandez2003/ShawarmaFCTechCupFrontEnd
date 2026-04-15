@@ -205,6 +205,7 @@ const AlineacionesArbitroPage = () => {
   const [lineups, setLineups] = useState<ArbitroLineups>(alineaciones)
   const [loading, setLoading] = useState<boolean>(true)
   const [fromBackend, setFromBackend] = useState<boolean>(false)
+  const [lineupsError, setLineupsError] = useState<string | null>(null)
 
   const matchId = searchParams.get('matchId') ?? undefined
 
@@ -213,11 +214,13 @@ const AlineacionesArbitroPage = () => {
 
     const loadLineups = async () => {
       setLoading(true)
+      setLineupsError(null)
       try {
         const result = await obtenerAlineacionesArbitro(matchId)
         if (!isMounted) return
         setLineups(result.lineups)
         setFromBackend(result.fromBackend)
+        setLineupsError(result.error)
       } finally {
         if (isMounted) setLoading(false)
       }
@@ -243,7 +246,9 @@ const AlineacionesArbitroPage = () => {
           {!loading && fromBackend && 'Datos cargados desde backend.'}
           {!loading &&
             !fromBackend &&
-            'No se encontraron alineaciones en backend. Mostrando datos de respaldo.'}
+            (lineupsError
+              ? `No se pudieron cargar alineaciones desde backend: ${lineupsError}. Mostrando datos de respaldo.`
+              : 'No se encontraron alineaciones en backend. Mostrando datos de respaldo.')}
         </div>
 
         <div

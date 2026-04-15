@@ -1,13 +1,17 @@
 import { useEffect, useState, type CSSProperties } from 'react'
 import { useNavigate } from 'react-router-dom'
 import PageHeader from '../../components/common/PageHeader'
-import { obtenerHistorialPartidosArbitrados } from '../../services/arbitroService'
+import {
+  obtenerHistorialPartidosArbitrados,
+  obtenerPartidosAsignadosArbitro,
+  type RefereeMatch,
+} from '../../services/arbitroService'
 import ArbitroQuickActions from './ArbitroQuickActions'
 import {
   type MatchSummary,
   canchaAsignada,
   notificaciones,
-  partidosAsignados,
+  partidosAsignados as partidosAsignadosResumen,
   proximoPartido,
 } from './arbitroData'
 
@@ -20,26 +24,41 @@ const cardStyle: CSSProperties = {
 
 const ArbitroPanelPage = () => {
   const navigate = useNavigate()
+  const [partidosAsignadosLista, setPartidosAsignadosLista] = useState<RefereeMatch[]>([])
+  const [loadingAsignados, setLoadingAsignados] = useState<boolean>(true)
+  const [errorAsignados, setErrorAsignados] = useState<string | null>(null)
   const [historialPartidos, setHistorialPartidos] = useState<MatchSummary[]>([])
   const [loadingHistorial, setLoadingHistorial] = useState<boolean>(true)
-  const [fromBackend, setFromBackend] = useState<boolean>(false)
+  const [fromBackendHistorial, setFromBackendHistorial] = useState<boolean>(false)
+  const [errorHistorial, setErrorHistorial] = useState<string | null>(null)
 
   useEffect(() => {
     let isMounted = true
 
-    const loadHistorial = async () => {
+    const loadPanelData = async () => {
+      setLoadingAsignados(true)
       setLoadingHistorial(true)
-      try {
-        const result = await obtenerHistorialPartidosArbitrados()
-        if (!isMounted) return
-        setHistorialPartidos(result.matches)
-        setFromBackend(result.fromBackend)
-      } finally {
-        if (isMounted) setLoadingHistorial(false)
-      }
+      setErrorAsignados(null)
+      setErrorHistorial(null)
+
+      const [asignadosResult, historialResult] = await Promise.all([
+        obtenerPartidosAsignadosArbitro(),
+        obtenerHistorialPartidosArbitrados(),
+      ])
+
+      if (!isMounted) return
+
+      setPartidosAsignadosLista(asignadosResult.matches)
+      setErrorAsignados(asignadosResult.error)
+      setLoadingAsignados(false)
+
+      setHistorialPartidos(historialResult.matches)
+      setFromBackendHistorial(historialResult.fromBackend)
+      setErrorHistorial(historialResult.error)
+      setLoadingHistorial(false)
     }
 
-    loadHistorial()
+    void loadPanelData()
 
     return () => {
       isMounted = false
@@ -84,7 +103,7 @@ const ArbitroPanelPage = () => {
                 color: '#111827',
               }}
             >
-              {partidosAsignados}
+              {partidosAsignadosResumen}
             </p>
           </div>
           <div style={cardStyle}>
@@ -206,6 +225,85 @@ const ArbitroPanelPage = () => {
         </div>
 
         <div style={{ ...cardStyle, marginTop: '0.75rem', overflowX: 'auto' }}>
+          <h3 style={{ margin: 0, fontSize: '0.95rem', color: '#111827' }}>Partidos Asignados</h3>
+          {loadingAsignados && (
+            <p style={{ marginTop: '0.85rem', fontSize: '0.85rem', color: '#6B7280' }}>
+              Cargando partidos asignados...
+            </p>
+          )}
+          {!loadingAsignados && errorAsignados && (
+            <p style={{ marginTop: '0.85rem', fontSize: '0.85rem', color: '#B91C1C' }}>
+              Error al cargar partidos asignados: {errorAsignados}
+            </p>
+          )}
+          {!loadingAsignados && partidosAsignadosLista.length === 0 && (
+            <p style={{ marginTop: '0.85rem', fontSize: '0.85rem', color: '#6B7280' }}>
+              No tienes partidos asignados por ahora.
+            </p>
+          )}
+          {!loadingAsignados && partidosAsignadosLista.length > 0 && (
+            <table
+              style={{
+                width: '100%',
+                borderCollapse: 'collapse',
+                marginTop: '0.75rem',
+                minWidth: '760px',
+              }}
+            >
+              <thead>
+                <tr>
+                  {['Fecha', 'Equipos', 'Cancha', 'Estado', 'Acciones'].map(col => (
+                    <th
+                      key={col}
+                      style={{
+                        textAlign: 'left',
+                        padding: '0.55rem',
+                        borderBottom: '1px solid #E5E7EB',
+                        fontSize: '0.78rem',
+                        color: '#374151',
+                      }}
+                    >
+                      {col}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {partidosAsignadosLista.map(partido => (
+                  <tr key={partido.id}>
+                    <td style={{ padding: '0.55rem', fontSize: '0.78rem' }}>{partido.fecha}</td>
+                    <td style={{ padding: '0.55rem', fontSize: '0.78rem' }}>
+                      {partido.local} vs {partido.visitante}
+                    </td>
+                    <td style={{ padding: '0.55rem', fontSize: '0.78rem' }}>{partido.cancha}</td>
+                    <td style={{ padding: '0.55rem', fontSize: '0.78rem', fontWeight: 600 }}>
+                      {partido.status}
+                    </td>
+                    <td style={{ padding: '0.55rem' }}>
+                      <button
+                        onClick={() =>
+                          navigate(`/arbitro/partidos?matchId=${encodeURIComponent(partido.id)}`)
+                        }
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          color: '#11823B',
+                          fontWeight: 600,
+                          fontSize: '0.78rem',
+                          padding: 0,
+                        }}
+                      >
+                        Gestionar
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+
+        <div style={{ ...cardStyle, marginTop: '0.75rem', overflowX: 'auto' }}>
           <h3 style={{ margin: 0, fontSize: '0.95rem', color: '#111827' }}>
             Historial de Partidos Arbitrados
           </h3>
@@ -214,9 +312,14 @@ const ArbitroPanelPage = () => {
               Cargando partidos arbitrados...
             </p>
           )}
+          {!loadingHistorial && errorHistorial && (
+            <p style={{ marginTop: '0.85rem', fontSize: '0.85rem', color: '#B91C1C' }}>
+              Error al cargar historial de partidos arbitrados: {errorHistorial}
+            </p>
+          )}
           {!loadingHistorial && historialPartidos.length === 0 && (
             <p style={{ marginTop: '0.85rem', fontSize: '0.85rem', color: '#6B7280' }}>
-              {fromBackend
+              {fromBackendHistorial
                 ? 'Aun no hay partidos arbitrados registrados en la base de datos.'
                 : 'No hay datos de partidos arbitrados disponibles por ahora.'}
             </p>

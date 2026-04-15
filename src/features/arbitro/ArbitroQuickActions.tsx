@@ -1,12 +1,13 @@
 import { useNavigate } from 'react-router-dom'
 
-type ActionId = 'alineaciones' | 'reglamento' | 'tabla'
+type ActionId = 'alineaciones' | 'reglamento' | 'tabla' | 'partidos'
 
 interface ArbitroQuickActionsProps {
   active?: ActionId
 }
 
 const actions: Array<{ id: ActionId; label: string; to: string }> = [
+  { id: 'partidos', label: 'Gestionar Partidos', to: '/arbitro/partidos' },
   { id: 'alineaciones', label: 'Ver Alineaciones', to: '/arbitro/alineaciones' },
   { id: 'reglamento', label: 'Consultar Reglamento', to: '/arbitro/reglamento' },
   { id: 'tabla', label: 'Ver Tabla de Posiciones', to: '/arbitro/tabla' },
