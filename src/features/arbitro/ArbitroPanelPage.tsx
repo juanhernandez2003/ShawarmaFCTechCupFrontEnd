@@ -7,13 +7,7 @@ import {
   type RefereeMatch,
 } from '../../services/arbitroService'
 import ArbitroQuickActions from './ArbitroQuickActions'
-import {
-  type MatchSummary,
-  canchaAsignada,
-  notificaciones,
-  partidosAsignados as partidosAsignadosResumen,
-  proximoPartido,
-} from './arbitroData'
+import { notificaciones } from './arbitroData'
 
 const cardStyle: CSSProperties = {
   backgroundColor: '#FFFFFF',
@@ -27,7 +21,7 @@ const ArbitroPanelPage = () => {
   const [partidosAsignadosLista, setPartidosAsignadosLista] = useState<RefereeMatch[]>([])
   const [loadingAsignados, setLoadingAsignados] = useState<boolean>(true)
   const [errorAsignados, setErrorAsignados] = useState<string | null>(null)
-  const [historialPartidos, setHistorialPartidos] = useState<MatchSummary[]>([])
+  const [historialPartidos, setHistorialPartidos] = useState<RefereeMatch[]>([])
   const [loadingHistorial, setLoadingHistorial] = useState<boolean>(true)
   const [fromBackendHistorial, setFromBackendHistorial] = useState<boolean>(false)
   const [errorHistorial, setErrorHistorial] = useState<string | null>(null)
@@ -65,7 +59,13 @@ const ArbitroPanelPage = () => {
     }
   }, [])
 
+  const partidosAsignadosResumen = partidosAsignadosLista.length
   const partidosArbitrados = historialPartidos.length
+  const proximoPartidoData = partidosAsignadosLista[0] ?? null
+  const proximoPartidoResumen = proximoPartidoData
+    ? `${proximoPartidoData.local} vs ${proximoPartidoData.visitante}`
+    : '0'
+  const canchaAsignadaResumen = proximoPartidoData?.cancha ?? 'Sin cancha'
 
   return (
     <div>
@@ -129,7 +129,7 @@ const ArbitroPanelPage = () => {
                 color: '#111827',
               }}
             >
-              {proximoPartido}
+              {proximoPartidoResumen}
             </p>
           </div>
           <div style={cardStyle}>
@@ -142,7 +142,7 @@ const ArbitroPanelPage = () => {
                 color: '#111827',
               }}
             >
-              {canchaAsignada}
+              {canchaAsignadaResumen}
             </p>
           </div>
         </div>
@@ -157,51 +157,24 @@ const ArbitroPanelPage = () => {
         >
           <div style={cardStyle}>
             <h3 style={{ margin: 0, fontSize: '0.95rem', color: '#111827' }}>Proximo Partido</h3>
-            <p style={{ margin: '0.9rem 0 0.25rem', color: '#6B7280', fontSize: '0.8rem' }}>
-              12 de Marzo, 2026 - 16:00 hrs
-            </p>
-            <p style={{ margin: 0, color: '#6B7280', fontSize: '0.8rem' }}>
-              Cancha A - Campo Principal
-            </p>
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '1.8rem',
-                marginTop: '1.2rem',
-              }}
-            >
-              <div style={{ textAlign: 'center' }}>
-                <div
-                  style={{
-                    width: '62px',
-                    height: '62px',
-                    backgroundColor: '#F3F4F6',
-                    borderRadius: '8px',
-                    margin: '0 auto',
-                  }}
-                />
-                <p style={{ margin: '0.5rem 0 0', fontSize: '0.8rem', fontWeight: 600 }}>
-                  Blue Waves
+            {!loadingAsignados && !proximoPartidoData && (
+              <p style={{ margin: '0.9rem 0 0', color: '#6B7280', fontSize: '0.8rem' }}>
+                No tienes un proximo partido asignado.
+              </p>
+            )}
+            {proximoPartidoData && (
+              <>
+                <p style={{ margin: '0.9rem 0 0.25rem', color: '#6B7280', fontSize: '0.8rem' }}>
+                  {proximoPartidoData.fecha}
                 </p>
-              </div>
-              <span style={{ color: '#6B7280', fontWeight: 700 }}>VS</span>
-              <div style={{ textAlign: 'center' }}>
-                <div
-                  style={{
-                    width: '62px',
-                    height: '62px',
-                    backgroundColor: '#F3F4F6',
-                    borderRadius: '8px',
-                    margin: '0 auto',
-                  }}
-                />
-                <p style={{ margin: '0.5rem 0 0', fontSize: '0.8rem', fontWeight: 600 }}>
-                  United FC
+                <p style={{ margin: 0, color: '#6B7280', fontSize: '0.8rem' }}>
+                  {proximoPartidoData.cancha}
                 </p>
-              </div>
-            </div>
+                <p style={{ margin: '0.7rem 0 0', color: '#111827', fontWeight: 700 }}>
+                  {proximoPartidoData.local} vs {proximoPartidoData.visitante}
+                </p>
+              </>
+            )}
           </div>
 
           <div style={cardStyle}>

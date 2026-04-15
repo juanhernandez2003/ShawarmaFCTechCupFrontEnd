@@ -1,9 +1,5 @@
 import apiClient from './apiClient'
-import {
-  type ArbitroLineups,
-  type MatchSummary,
-  alineaciones as fallbackLineups,
-} from '../features/arbitro/arbitroData'
+import { type ArbitroLineups, type MatchSummary } from '../features/arbitro/arbitroData'
 
 type UnknownRecord = Record<string, unknown>
 
@@ -524,165 +520,136 @@ export const validarSancionPayload = (payload: SanctionPayload): string | null =
   return null
 }
 
-const postToFirstAvailable = async (endpoints: string[], payload?: unknown): Promise<void> => {
-  let lastError = 'No se pudo completar la operacion.'
-
-  for (const endpoint of endpoints) {
-    try {
-      await apiClient.post(endpoint, payload ?? {})
-      return
-    } catch (error: unknown) {
-      lastError = extractApiErrorMessage(error)
-    }
-  }
-
-  throw new Error(lastError)
+const postToEndpoint = async (endpoint: string, payload?: unknown): Promise<void> => {
+  await apiClient.post(endpoint, payload ?? {})
 }
 
 export const obtenerPartidosAsignadosArbitro = async (): Promise<FetchMatchesResult> => {
-  const endpoints = [
-    '/api/referees/me/matches/assigned',
-    '/api/referees/me/matches?status=ASSIGNED',
-    '/api/arbitro/partidos/asignados',
-    '/api/matches?status=ASSIGNED',
-  ]
-
-  let lastError: string | null = null
-
-  for (const endpoint of endpoints) {
-    try {
-      const response = await apiClient.get<unknown>(endpoint)
-      const normalized = normalizeMatchesPayload(response.data, true)
-      if (normalized !== null) {
-        const filtered = normalized.filter(match => match.status !== 'FINISHED')
-        return {
-          matches: filtered,
-          fromBackend: true,
-          error: null,
-        }
+  try {
+    const response = await apiClient.get<unknown>('/api/referees/me/matches/assigned')
+    const normalized = normalizeMatchesPayload(response.data, true)
+    if (normalized === null) {
+      return {
+        matches: [],
+        fromBackend: false,
+        error: 'El formato de respuesta de partidos asignados no es compatible.',
       }
-      lastError = 'El formato de respuesta de partidos asignados no es compatible.'
-    } catch (error: unknown) {
-      lastError = extractApiErrorMessage(error)
     }
-  }
 
-  return {
-    matches: [],
-    fromBackend: false,
-    error: lastError ?? 'No fue posible cargar los partidos asignados.',
+    const filtered = normalized.filter(match => match.status !== 'FINISHED')
+    return {
+      matches: filtered,
+      fromBackend: true,
+      error: null,
+    }
+  } catch (error: unknown) {
+    return {
+      matches: [],
+      fromBackend: false,
+      error: extractApiErrorMessage(error),
+    }
   }
 }
 
 export const obtenerHistorialPartidosArbitrados = async (): Promise<FetchMatchesResult> => {
-  const endpoints = [
-    '/api/referees/me/matches/arbitrated',
-    '/api/referees/me/matches?status=FINISHED',
-    '/api/arbitro/partidos/arbitrados',
-    '/api/partidos/arbitrados',
-    '/api/matches?status=FINISHED',
-  ]
-
-  let lastError: string | null = null
-
-  for (const endpoint of endpoints) {
-    try {
-      const response = await apiClient.get<unknown>(endpoint)
-      const normalized = normalizeMatchesPayload(response.data, true)
-      if (normalized !== null) {
-        return {
-          matches: normalized,
-          fromBackend: true,
-          error: null,
-        }
+  try {
+    const response = await apiClient.get<unknown>('/api/referees/me/matches/arbitrated')
+    const normalized = normalizeMatchesPayload(response.data, true)
+    if (normalized === null) {
+      return {
+        matches: [],
+        fromBackend: false,
+        error: 'El formato de respuesta de historial no es compatible.',
       }
-      lastError = 'El formato de respuesta de historial no es compatible.'
-    } catch (error: unknown) {
-      lastError = extractApiErrorMessage(error)
     }
-  }
 
-  return {
-    matches: [],
-    fromBackend: false,
-    error: lastError ?? 'No fue posible cargar el historial de partidos arbitrados.',
+    return {
+      matches: normalized,
+      fromBackend: true,
+      error: null,
+    }
+  } catch (error: unknown) {
+    return {
+      matches: [],
+      fromBackend: false,
+      error: extractApiErrorMessage(error),
+    }
   }
 }
 
 export const obtenerDetallePartidoArbitro = async (
   matchId: string
 ): Promise<FetchMatchDetailResult> => {
-  const endpoints = [
-    `/api/referees/me/matches/${matchId}`,
-    `/api/arbitro/partidos/${matchId}`,
-    `/api/matches/${matchId}`,
-  ]
-
-  let lastError: string | null = null
-
-  for (const endpoint of endpoints) {
-    try {
-      const response = await apiClient.get<unknown>(endpoint)
-      const normalized = normalizeMatchDetailPayload(response.data, matchId)
-      if (normalized) {
-        return {
-          match: normalized,
-          fromBackend: true,
-          error: null,
-        }
+  try {
+    const response = await apiClient.get<unknown>(`/api/referees/me/matches/${matchId}`)
+    const normalized = normalizeMatchDetailPayload(response.data, matchId)
+    if (!normalized) {
+      return {
+        match: null,
+        fromBackend: false,
+        error: 'El formato del detalle del partido no es compatible.',
       }
-      lastError = 'El formato del detalle del partido no es compatible.'
-    } catch (error: unknown) {
-      lastError = extractApiErrorMessage(error)
     }
-  }
 
-  return {
-    match: null,
-    fromBackend: false,
-    error: lastError ?? 'No fue posible cargar el detalle del partido.',
+    return {
+      match: normalized,
+      fromBackend: true,
+      error: null,
+    }
+  } catch (error: unknown) {
+    return {
+      match: null,
+      fromBackend: false,
+      error: extractApiErrorMessage(error),
+    }
   }
 }
 
 export const obtenerAlineacionesArbitro = async (matchId?: string): Promise<FetchLineupsResult> => {
-  const endpoints: string[] = []
+  let resolvedMatchId = matchId
 
-  if (matchId) {
-    endpoints.push(
-      `/api/matches/${matchId}/lineups`,
-      `/api/matches/${matchId}/alineaciones`,
-      `/api/partidos/${matchId}/alineaciones`
-    )
-  }
-
-  endpoints.push(
-    '/api/referees/me/next-match/lineups',
-    '/api/arbitro/partidos/proximo/alineaciones'
-  )
-
-  let lastError: string | null = null
-
-  for (const endpoint of endpoints) {
-    try {
-      const response = await apiClient.get<unknown>(endpoint)
-      const normalized = normalizeLineupsPayload(response.data)
-      if (normalized) {
-        return {
-          lineups: normalized,
-          fromBackend: true,
-          error: null,
-        }
+  if (!resolvedMatchId) {
+    const assignedResult = await obtenerPartidosAsignadosArbitro()
+    resolvedMatchId = assignedResult.matches[0]?.id
+    if (!resolvedMatchId) {
+      return {
+        lineups: {
+          local: { equipo: 'Equipo local', jugadores: [] },
+          visitante: { equipo: 'Equipo visitante', jugadores: [] },
+        },
+        fromBackend: false,
+        error: assignedResult.error ?? 'No hay partidos asignados para consultar alineaciones.',
       }
-      lastError = 'El formato de alineaciones recibido no es compatible.'
-    } catch (error: unknown) {
-      lastError = extractApiErrorMessage(error)
     }
   }
 
-  return {
-    lineups: fallbackLineups,
-    fromBackend: false,
-    error: lastError ?? 'No se pudieron cargar alineaciones desde backend.',
+  try {
+    const response = await apiClient.get<unknown>(`/api/matches/${resolvedMatchId}/lineups`)
+    const normalized = normalizeLineupsPayload(response.data)
+    if (!normalized) {
+      return {
+        lineups: {
+          local: { equipo: 'Equipo local', jugadores: [] },
+          visitante: { equipo: 'Equipo visitante', jugadores: [] },
+        },
+        fromBackend: false,
+        error: 'El formato de alineaciones recibido no es compatible.',
+      }
+    }
+    return {
+      lineups: normalized,
+      fromBackend: true,
+      error: null,
+    }
+  } catch (error: unknown) {
+    return {
+      lineups: {
+        local: { equipo: 'Equipo local', jugadores: [] },
+        visitante: { equipo: 'Equipo visitante', jugadores: [] },
+      },
+      fromBackend: false,
+      error: extractApiErrorMessage(error),
+    }
   }
 }
 
@@ -694,11 +661,7 @@ export const iniciarPartidoArbitro = async (
   if (!match) return { ok: false, error: 'No se pudo identificar el partido.' }
 
   try {
-    await postToFirstAvailable([
-      `/api/referees/me/matches/${match.id}/start`,
-      `/api/arbitro/partidos/${match.id}/iniciar`,
-      `/api/matches/${match.id}/start`,
-    ])
+    await postToEndpoint(`/api/referees/me/matches/${match.id}/start`)
     return { ok: true, error: null }
   } catch (error: unknown) {
     return { ok: false, error: extractApiErrorMessage(error) }
@@ -713,11 +676,7 @@ export const finalizarPartidoArbitro = async (
   if (!match) return { ok: false, error: 'No se pudo identificar el partido.' }
 
   try {
-    await postToFirstAvailable([
-      `/api/referees/me/matches/${match.id}/finish`,
-      `/api/arbitro/partidos/${match.id}/finalizar`,
-      `/api/matches/${match.id}/finish`,
-    ])
+    await postToEndpoint(`/api/referees/me/matches/${match.id}/finish`)
     return { ok: true, error: null }
   } catch (error: unknown) {
     return { ok: false, error: extractApiErrorMessage(error) }
@@ -736,14 +695,7 @@ export const registrarResultadoArbitro = async (
   if (!match) return { ok: false, error: 'No se pudo identificar el partido.' }
 
   try {
-    await postToFirstAvailable(
-      [
-        `/api/referees/me/matches/${match.id}/result`,
-        `/api/arbitro/partidos/${match.id}/resultado`,
-        `/api/matches/${match.id}/result`,
-      ],
-      payload
-    )
+    await postToEndpoint(`/api/referees/me/matches/${match.id}/result`, payload)
     return { ok: true, error: null }
   } catch (error: unknown) {
     return { ok: false, error: extractApiErrorMessage(error) }
@@ -762,14 +714,7 @@ export const registrarGoleadorArbitro = async (
   if (!match) return { ok: false, error: 'No se pudo identificar el partido.' }
 
   try {
-    await postToFirstAvailable(
-      [
-        `/api/referees/me/matches/${match.id}/goals`,
-        `/api/arbitro/partidos/${match.id}/goleadores`,
-        `/api/matches/${match.id}/goals`,
-      ],
-      payload
-    )
+    await postToEndpoint(`/api/referees/me/matches/${match.id}/goals`, payload)
     return { ok: true, error: null }
   } catch (error: unknown) {
     return { ok: false, error: extractApiErrorMessage(error) }
@@ -788,14 +733,7 @@ export const registrarSancionArbitro = async (
   if (!match) return { ok: false, error: 'No se pudo identificar el partido.' }
 
   try {
-    await postToFirstAvailable(
-      [
-        `/api/referees/me/matches/${match.id}/sanctions`,
-        `/api/arbitro/partidos/${match.id}/sanciones`,
-        `/api/matches/${match.id}/sanctions`,
-      ],
-      payload
-    )
+    await postToEndpoint(`/api/referees/me/matches/${match.id}/sanctions`, payload)
     return { ok: true, error: null }
   } catch (error: unknown) {
     return { ok: false, error: extractApiErrorMessage(error) }

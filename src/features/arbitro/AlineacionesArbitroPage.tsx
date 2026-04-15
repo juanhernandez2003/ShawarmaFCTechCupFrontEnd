@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import PageHeader from '../../components/common/PageHeader'
 import { obtenerAlineacionesArbitro } from '../../services/arbitroService'
 import ArbitroQuickActions from './ArbitroQuickActions'
-import { type ArbitroLineups, alineaciones } from './arbitroData'
+import { type ArbitroLineups } from './arbitroData'
 
 interface FieldPoint {
   x: number
@@ -35,6 +35,10 @@ const fieldShapeStyle: CSSProperties = {
 }
 
 const FUTBOL_7_TITULARES = 7
+const EMPTY_LINEUPS: ArbitroLineups = {
+  local: { equipo: 'Equipo local', jugadores: [] },
+  visitante: { equipo: 'Equipo visitante', jugadores: [] },
+}
 
 const formation231: FieldPoint[] = [
   { x: 50, y: 90 }, // GK
@@ -202,12 +206,13 @@ const TeamField = ({ equipo, jugadores, colorJugador }: TeamFieldProps) => {
 const AlineacionesArbitroPage = () => {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const [lineups, setLineups] = useState<ArbitroLineups>(alineaciones)
+  const [lineups, setLineups] = useState<ArbitroLineups>(EMPTY_LINEUPS)
   const [loading, setLoading] = useState<boolean>(true)
   const [fromBackend, setFromBackend] = useState<boolean>(false)
   const [lineupsError, setLineupsError] = useState<string | null>(null)
 
   const matchId = searchParams.get('matchId') ?? undefined
+  const hasLineups = lineups.local.jugadores.length > 0 && lineups.visitante.jugadores.length > 0
 
   useEffect(() => {
     let isMounted = true
@@ -237,38 +242,61 @@ const AlineacionesArbitroPage = () => {
     <div>
       <PageHeader
         title="Ver Alineaciones"
-        subtitle={`${lineups.local.equipo} vs ${lineups.visitante.equipo}`}
+        subtitle={
+          hasLineups
+            ? `${lineups.local.equipo} vs ${lineups.visitante.equipo}`
+            : 'Sin alineaciones disponibles'
+        }
       />
 
       <div style={{ maxWidth: '1180px', margin: '0 auto', padding: '1rem' }}>
         <div style={{ marginBottom: '0.75rem', fontSize: '0.8rem', color: '#4B5563' }}>
           {loading && 'Cargando alineaciones...'}
-          {!loading && fromBackend && 'Datos cargados desde backend.'}
+          {!loading && fromBackend && hasLineups && 'Datos cargados desde backend.'}
+          {!loading &&
+            fromBackend &&
+            !hasLineups &&
+            'No hay alineaciones cargadas para este partido.'}
           {!loading &&
             !fromBackend &&
             (lineupsError
-              ? `No se pudieron cargar alineaciones desde backend: ${lineupsError}. Mostrando datos de respaldo.`
-              : 'No se encontraron alineaciones en backend. Mostrando datos de respaldo.')}
+              ? `No se pudieron cargar alineaciones desde backend: ${lineupsError}.`
+              : 'No se pudieron cargar alineaciones desde backend.')}
         </div>
 
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))',
-            gap: '0.75rem',
-          }}
-        >
-          <TeamField
-            equipo={lineups.local.equipo}
-            jugadores={lineups.local.jugadores.slice(0, FUTBOL_7_TITULARES)}
-            colorJugador="#2563EB"
-          />
-          <TeamField
-            equipo={lineups.visitante.equipo}
-            jugadores={lineups.visitante.jugadores.slice(0, FUTBOL_7_TITULARES)}
-            colorJugador="#0E7490"
-          />
-        </div>
+        {hasLineups ? (
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))',
+              gap: '0.75rem',
+            }}
+          >
+            <TeamField
+              equipo={lineups.local.equipo}
+              jugadores={lineups.local.jugadores.slice(0, FUTBOL_7_TITULARES)}
+              colorJugador="#2563EB"
+            />
+            <TeamField
+              equipo={lineups.visitante.equipo}
+              jugadores={lineups.visitante.jugadores.slice(0, FUTBOL_7_TITULARES)}
+              colorJugador="#0E7490"
+            />
+          </div>
+        ) : (
+          <div
+            style={{
+              backgroundColor: '#FFFFFF',
+              borderRadius: '8px',
+              padding: '1rem',
+              boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
+              color: '#6B7280',
+              fontSize: '0.85rem',
+            }}
+          >
+            No hay alineaciones disponibles para mostrar.
+          </div>
+        )}
 
         <ArbitroQuickActions active="alineaciones" />
 
