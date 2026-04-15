@@ -16,6 +16,11 @@ import TablaPage from '../features/torneos/TablaPage'
 import GoleadoresPage from '../features/torneos/GoleadoresPage'
 import EquiposPage from '../features/torneos/EquiposPage'
 import CrearPerfilPage from '../features/players/CrearPerfilPage'
+import ArbitroPanelPage from '../features/arbitro/ArbitroPanelPage'
+import AlineacionesArbitroPage from '../features/arbitro/AlineacionesArbitroPage'
+import ReglamentoArbitroPage from '../features/arbitro/ReglamentoArbitroPage'
+import TablaPosicionesArbitroPage from '../features/arbitro/TablaPosicionesArbitroPage'
+import LlavesArbitroPage from '../features/arbitro/LlavesArbitroPage'
 
 const AppRouter = () => {
   return (
@@ -52,6 +57,30 @@ const AppRouter = () => {
         <Route path="/registro" element={<RegisterPage />} />
 
         {/* Rutas protegidas */}
+        <Route
+          element={
+            <PrivateRoute>
+              <DashboardLayout
+                roleLabel="Arbitro"
+                navLinks={[
+                  { label: 'Inicio', to: '/arbitro' },
+                  { label: 'Torneos', to: '/torneos' },
+                  { label: 'Equipos', to: '/equipos' },
+                  { label: 'Reglamento', to: '/arbitro/reglamento' },
+                ]}
+              >
+                <Outlet />
+              </DashboardLayout>
+            </PrivateRoute>
+          }
+        >
+          <Route path="/arbitro" element={<ArbitroPanelPage />} />
+          <Route path="/arbitro/alineaciones" element={<AlineacionesArbitroPage />} />
+          <Route path="/arbitro/reglamento" element={<ReglamentoArbitroPage />} />
+          <Route path="/arbitro/tabla" element={<TablaPosicionesArbitroPage />} />
+          <Route path="/arbitro/tabla/llaves" element={<LlavesArbitroPage />} />
+        </Route>
+
         <Route
           element={
             <PrivateRoute>
