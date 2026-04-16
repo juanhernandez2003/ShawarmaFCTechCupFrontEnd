@@ -29,7 +29,6 @@ import OrganizerDashboardPage from '../features/organizer/OrganizerDashboardPage
 import OrganizerCreateTournamentPage from '../features/organizer/OrganizerCreateTournamentPage'
 import OrganizerTournamentManagePage from '../features/organizer/OrganizerTournamentManagePage'
 
-
 const AppRouter = () => {
   return (
     <BrowserRouter>
