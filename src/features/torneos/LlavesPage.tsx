@@ -1,36 +1,20 @@
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
+import apiClient from '../../services/apiClient'
 import PageHeader from '../../components/common/PageHeader'
 
-interface Partido {
-  equipo1: string
-  equipo2: string
-  ganador?: string
+interface PartidoBracket {
+  partidoId: string
+  local: string
+  visitante: string
+  marcador: string
+  estado: string
 }
 
 interface Bracket {
-  cuartosIzq: Partido[]
-  semifinalIzq: Partido
-  semifinalDer: Partido
-  cuartosDer: Partido[]
-  final: Partido
-}
-
-const bracket: Bracket = {
-  cuartosIzq: [
-    { equipo1: 'FC Dynamo', equipo2: 'United FC', ganador: 'FC Dynamo' },
-    { equipo1: 'Silver Stars', equipo2: 'Red Dragons', ganador: 'Red Dragons' },
-  ],
-  semifinalIzq: { equipo1: 'FC Dynamo', equipo2: 'Red Dragons', ganador: 'FC Dynamo' },
-  semifinalDer: {
-    equipo1: 'Forest Rangers',
-    equipo2: 'Desert Scorpions',
-    ganador: 'Forest Rangers',
-  },
-  cuartosDer: [
-    { equipo1: 'Green Giants', equipo2: 'Forest Rangers', ganador: 'Forest Rangers' },
-    { equipo1: 'Sporting Lions', equipo2: 'Desert Scorpions', ganador: 'Desert Scorpions' },
-  ],
-  final: { equipo1: 'FC Dynamo', equipo2: 'Forest Rangers' },
+  CUARTOS?: PartidoBracket[]
+  SEMIFINAL?: PartidoBracket[]
+  FINAL?: PartidoBracket[]
 }
 
 const EquipoBox = ({ nombre, esGanador }: { nombre: string; esGanador?: boolean }) => (
@@ -52,8 +36,41 @@ const EquipoBox = ({ nombre, esGanador }: { nombre: string; esGanador?: boolean 
   </div>
 )
 
+const getGanador = (partido: PartidoBracket): string | null => {
+  if (partido.estado !== 'FINALIZADO') return null
+  const partes = partido.marcador.split(' - ')
+  if (partes.length !== 2) return null
+  const golesLocal = Number(partes[0])
+  const golesVisitante = Number(partes[1])
+  if (golesLocal > golesVisitante) return partido.local
+  if (golesVisitante > golesLocal) return partido.visitante
+  return null
+}
+
 const LlavesPage = () => {
   const navigate = useNavigate()
+  const { id: torneoId } = useParams<{ id: string }>()
+  const [bracket, setBracket] = useState<Bracket>({})
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!torneoId) return
+    apiClient
+      .get(`/api/tournaments/${torneoId}/bracket`)
+      .then(res => setBracket(res.data))
+      .catch(() => setError('Error al cargar las llaves del torneo'))
+      .finally(() => setLoading(false))
+  }, [torneoId])
+
+  const cuartos = bracket.CUARTOS || []
+  const semifinal = bracket.SEMIFINAL || []
+  const final_ = bracket.FINAL || []
+
+  const cuartosIzq = cuartos.slice(0, Math.ceil(cuartos.length / 2))
+  const cuartosDer = cuartos.slice(Math.ceil(cuartos.length / 2))
+  const semifinalIzq = semifinal.slice(0, 1)
+  const semifinalDer = semifinal.slice(1, 2)
 
   return (
     <div>
@@ -62,7 +79,6 @@ const LlavesPage = () => {
         subtitle="Consulta los enfrentamientos de las fases eliminatorias"
       />
 
-      {/* Contenedor principal con fondo de cancha */}
       <div
         style={{
           backgroundColor: '#D9D9D9',
@@ -102,211 +118,225 @@ const LlavesPage = () => {
           }}
         />
 
-        {/* Bracket */}
-        <div
-          style={{
-            backgroundColor: 'rgba(255,255,255,0.4)',
-            borderRadius: '8px',
-            padding: '2rem 1.5rem',
-            maxWidth: '900px',
-            margin: '0 auto',
-            position: 'relative',
-          }}
-        >
-          {/* Headers de rondas */}
+        {loading ? (
           <div
             style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr',
               textAlign: 'center',
-              marginBottom: '1.5rem',
+              padding: '4rem',
+              color: '#737373',
+              fontFamily: 'Montserrat, sans-serif',
             }}
           >
-            <span
-              style={{
-                fontSize: '0.78rem',
-                fontWeight: 'bold',
-                color: '#11823B',
-                fontFamily: 'Montserrat, sans-serif',
-                fontStyle: 'italic',
-              }}
-            >
-              Cuartos de Final
-            </span>
-            <span
-              style={{
-                fontSize: '0.78rem',
-                fontWeight: 'bold',
-                color: '#11823B',
-                fontFamily: 'Montserrat, sans-serif',
-                fontStyle: 'italic',
-              }}
-            >
-              Semifinal
-            </span>
-            <span
-              style={{
-                fontSize: '0.78rem',
-                fontWeight: 'bold',
-                color: '#11823B',
-                fontFamily: 'Poppins, sans-serif',
-                fontStyle: 'italic',
-              }}
-            >
-              Final
-            </span>
-            <span
-              style={{
-                fontSize: '0.78rem',
-                fontWeight: 'bold',
-                color: '#11823B',
-                fontFamily: 'Montserrat, sans-serif',
-                fontStyle: 'italic',
-              }}
-            >
-              Semifinal
-            </span>
-            <span
-              style={{
-                fontSize: '0.78rem',
-                fontWeight: 'bold',
-                color: '#11823B',
-                fontFamily: 'Montserrat, sans-serif',
-                fontStyle: 'italic',
-              }}
-            >
-              Cuartos de Final
-            </span>
+            Cargando llaves...
           </div>
-
-          {/* Bracket principal */}
+        ) : error ? (
           <div
             style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr',
-              alignItems: 'center',
-              gap: '0',
-              minHeight: '220px',
+              textAlign: 'center',
+              padding: '4rem',
+              color: '#ef4444',
+              fontFamily: 'Montserrat, sans-serif',
             }}
           >
-            {/* Cuartos izquierda */}
+            {error}
+          </div>
+        ) : Object.keys(bracket).length === 0 ? (
+          <div
+            style={{
+              textAlign: 'center',
+              padding: '4rem',
+              color: '#737373',
+              fontFamily: 'Montserrat, sans-serif',
+            }}
+          >
+            No hay llaves generadas para este torneo todavía.
+          </div>
+        ) : (
+          <div
+            style={{
+              backgroundColor: 'rgba(255,255,255,0.4)',
+              borderRadius: '8px',
+              padding: '2rem 1.5rem',
+              maxWidth: '900px',
+              margin: '0 auto',
+              position: 'relative',
+            }}
+          >
+            {/* Headers */}
             <div
               style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '2rem',
-                paddingRight: '0.5rem',
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr',
+                textAlign: 'center',
+                marginBottom: '1.5rem',
               }}
             >
-              {bracket.cuartosIzq.map((partido, i) => (
-                <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <EquipoBox
-                    nombre={partido.equipo1}
-                    esGanador={partido.ganador === partido.equipo1}
-                  />
-                  <EquipoBox
-                    nombre={partido.equipo2}
-                    esGanador={partido.ganador === partido.equipo2}
-                  />
-                </div>
-              ))}
+              {['Cuartos de Final', 'Semifinal', 'Final', 'Semifinal', 'Cuartos de Final'].map(
+                (label, i) => (
+                  <span
+                    key={i}
+                    style={{
+                      fontSize: '0.78rem',
+                      fontWeight: 'bold',
+                      color: '#11823B',
+                      fontFamily: i === 2 ? 'Poppins, sans-serif' : 'Montserrat, sans-serif',
+                      fontStyle: 'italic',
+                    }}
+                  >
+                    {label}
+                  </span>
+                )
+              )}
             </div>
 
-            {/* Semifinal izquierda */}
+            {/* Bracket */}
             <div
               style={{
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                alignItems: 'flex-start',
-                height: '100%',
-                paddingLeft: '0.5rem',
-              }}
-            >
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                <EquipoBox
-                  nombre={bracket.semifinalIzq.equipo1}
-                  esGanador={bracket.semifinalIzq.ganador === bracket.semifinalIzq.equipo1}
-                />
-                <EquipoBox
-                  nombre={bracket.semifinalIzq.equipo2}
-                  esGanador={bracket.semifinalIzq.ganador === bracket.semifinalIzq.equipo2}
-                />
-              </div>
-            </div>
-
-            {/* Final + Trofeo */}
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr',
                 alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.75rem',
-                height: '100%',
+                minHeight: '220px',
               }}
             >
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', width: '100%' }}>
-                <EquipoBox
-                  nombre={bracket.final.equipo1}
-                  esGanador={bracket.final.ganador === bracket.final.equipo1}
-                />
-                <EquipoBox
-                  nombre={bracket.final.equipo2}
-                  esGanador={bracket.final.ganador === bracket.final.equipo2}
-                />
+              {/* Cuartos izquierda */}
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '2rem',
+                  paddingRight: '0.5rem',
+                }}
+              >
+                {cuartosIzq.map((p, i) => {
+                  const ganador = getGanador(p)
+                  return (
+                    <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <EquipoBox nombre={p.local} esGanador={ganador === p.local} />
+                      <EquipoBox nombre={p.visitante} esGanador={ganador === p.visitante} />
+                    </div>
+                  )
+                })}
               </div>
-              {/* Trofeo */}
-              <div style={{ fontSize: '2rem', textAlign: 'center' }}>🏆</div>
-            </div>
 
-            {/* Semifinal derecha */}
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'center',
-                alignItems: 'flex-end',
-                height: '100%',
-                paddingRight: '0.5rem',
-              }}
-            >
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                <EquipoBox
-                  nombre={bracket.semifinalDer.equipo1}
-                  esGanador={bracket.semifinalDer.ganador === bracket.semifinalDer.equipo1}
-                />
-                <EquipoBox
-                  nombre={bracket.semifinalDer.equipo2}
-                  esGanador={bracket.semifinalDer.ganador === bracket.semifinalDer.equipo2}
-                />
+              {/* Semifinal izquierda */}
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'center',
+                  alignItems: 'flex-start',
+                  height: '100%',
+                  paddingLeft: '0.5rem',
+                }}
+              >
+                {semifinalIzq.map((p, i) => {
+                  const ganador = getGanador(p)
+                  return (
+                    <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <EquipoBox nombre={p.local} esGanador={ganador === p.local} />
+                      <EquipoBox nombre={p.visitante} esGanador={ganador === p.visitante} />
+                    </div>
+                  )
+                })}
               </div>
-            </div>
 
-            {/* Cuartos derecha */}
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '2rem',
-                paddingLeft: '0.5rem',
-              }}
-            >
-              {bracket.cuartosDer.map((partido, i) => (
-                <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <EquipoBox
-                    nombre={partido.equipo1}
-                    esGanador={partido.ganador === partido.equipo1}
-                  />
-                  <EquipoBox
-                    nombre={partido.equipo2}
-                    esGanador={partido.ganador === partido.equipo2}
-                  />
-                </div>
-              ))}
+              {/* Final + Trofeo */}
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.75rem',
+                  height: '100%',
+                }}
+              >
+                {final_.length > 0 ? (
+                  <>
+                    <div
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '4px',
+                        width: '100%',
+                      }}
+                    >
+                      {final_.map((p, i) => {
+                        const ganador = getGanador(p)
+                        return (
+                          <div
+                            key={i}
+                            style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}
+                          >
+                            <EquipoBox nombre={p.local} esGanador={ganador === p.local} />
+                            <EquipoBox nombre={p.visitante} esGanador={ganador === p.visitante} />
+                          </div>
+                        )
+                      })}
+                    </div>
+                    <div style={{ fontSize: '2rem' }}>🏆</div>
+                  </>
+                ) : (
+                  <div style={{ textAlign: 'center' }}>
+                    <div style={{ fontSize: '2rem' }}>🏆</div>
+                    <p
+                      style={{
+                        fontSize: '0.7rem',
+                        color: '#737373',
+                        fontFamily: 'Montserrat, sans-serif',
+                        marginTop: '0.5rem',
+                      }}
+                    >
+                      Final pendiente
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Semifinal derecha */}
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'center',
+                  alignItems: 'flex-end',
+                  height: '100%',
+                  paddingRight: '0.5rem',
+                }}
+              >
+                {semifinalDer.map((p, i) => {
+                  const ganador = getGanador(p)
+                  return (
+                    <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <EquipoBox nombre={p.local} esGanador={ganador === p.local} />
+                      <EquipoBox nombre={p.visitante} esGanador={ganador === p.visitante} />
+                    </div>
+                  )
+                })}
+              </div>
+
+              {/* Cuartos derecha */}
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '2rem',
+                  paddingLeft: '0.5rem',
+                }}
+              >
+                {cuartosDer.map((p, i) => {
+                  const ganador = getGanador(p)
+                  return (
+                    <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <EquipoBox nombre={p.local} esGanador={ganador === p.local} />
+                      <EquipoBox nombre={p.visitante} esGanador={ganador === p.visitante} />
+                    </div>
+                  )
+                })}
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Botón volver */}
         <div
