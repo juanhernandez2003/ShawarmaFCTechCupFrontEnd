@@ -34,6 +34,7 @@ const getRutaPorRol = (rol: string): string => {
     case 'CAPITAN':
       return '/equipos/registro'
     case 'JUGADOR':
+    case 'FAMILIAR':
       return '/equipos'
     case 'ARBITRO':
       return '/arbitro'
