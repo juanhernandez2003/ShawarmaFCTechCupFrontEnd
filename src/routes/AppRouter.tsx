@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Outlet, Navigate } from 'react-router-dom'
 import PrivateRoute from './PrivateRoute'
 import PublicLayout from '../components/layout/PublicLayout'
 import AuthLayout from '../components/layout/AuthLayout'
@@ -16,6 +16,9 @@ import TablaPage from '../features/torneos/TablaPage'
 import GoleadoresPage from '../features/torneos/GoleadoresPage'
 import EquiposPage from '../features/torneos/EquiposPage'
 import CrearPerfilPage from '../features/players/CrearPerfilPage'
+import OrganizerDashboardPage from '../features/organizer/OrganizerDashboardPage'
+import OrganizerCreateTournamentPage from '../features/organizer/OrganizerCreateTournamentPage'
+import OrganizerTournamentManagePage from '../features/organizer/OrganizerTournamentManagePage'
 
 const AppRouter = () => {
   return (
@@ -61,7 +64,11 @@ const AppRouter = () => {
             </PrivateRoute>
           }
         >
-          <Route path="/dashboard" element={<NotFoundPage />} />
+          <Route path="/dashboard" element={<Navigate to="/organizador" replace />} />
+          <Route path="/organizador" element={<OrganizerDashboardPage />} />
+          <Route path="/organizador/torneos/crear" element={<OrganizerCreateTournamentPage />} />
+          <Route path="/organizador/torneos/:id" element={<OrganizerTournamentManagePage />} />
+          <Route path="/configuracion" element={<Navigate to="/organizador" replace />} />
           <Route path="/equipos" element={<TeamListPage />} />
           <Route path="/equipos/:id" element={<TeamDetailPage />} />
           <Route path="/equipos/registro" element={<TeamRegisterPage />} />
