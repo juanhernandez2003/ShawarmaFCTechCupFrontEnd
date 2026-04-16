@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import DatePickerInput from '../../components/common/DatePickerInput'
+import TimePickerInput from '../../components/common/TimePickerInput'
 import {
   aprobarPago,
   canStartTournament,
@@ -35,20 +37,30 @@ type ManageTab = 'configuracion' | 'partidos' | 'pagos'
 
 interface ConfigurationForm {
   reglamento: string
-  cierreInscripciones: string
-  canchas: string
-  horarios: string
-  sanciones: string
+  fechasImportantes: string[]
+  nuevaFechaImportante: string
+  cierreFecha: string
+  cierreHora: string
+  horariosPartidos: string[]
+  nuevoHorarioPartido: string
+  canchas: string[]
+  sanciones: string[]
+  nuevaSancion: string
 }
 
 type MatchForm = CreateMatchPayload
 
 const initialConfigurationForm: ConfigurationForm = {
   reglamento: '',
-  cierreInscripciones: '',
-  canchas: '',
-  horarios: '',
-  sanciones: '',
+  fechasImportantes: [],
+  nuevaFechaImportante: '',
+  cierreFecha: '',
+  cierreHora: '',
+  horariosPartidos: [],
+  nuevoHorarioPartido: '',
+  canchas: [],
+  sanciones: [],
+  nuevaSancion: '',
 }
 
 const initialMatchForm: MatchForm = {
@@ -58,11 +70,39 @@ const initialMatchForm: MatchForm = {
   cancha: '',
 }
 
-const splitLines = (value: string) =>
-  value
-    .split('\n')
-    .map(item => item.trim())
-    .filter(Boolean)
+const AVAILABLE_COURTS = ['Cancha 1', 'Cancha 2', 'Cancha 3', 'Cancha 4', 'Cancha 5']
+
+const uniqueValues = (values: string[]) => Array.from(new Set(values.filter(Boolean)))
+
+const parseCloseDateTime = (value: string, date?: string, hour?: string) => {
+  if (date && hour) {
+    return { cierreFecha: date, cierreHora: hour }
+  }
+
+  if (!value) {
+    return { cierreFecha: '', cierreHora: '' }
+  }
+
+  const normalizedValue =
+    value.includes(' ') && !value.includes('T') ? value.replace(' ', 'T') : value
+  const parsedDate = new Date(normalizedValue)
+  if (!Number.isNaN(parsedDate.getTime())) {
+    return {
+      cierreFecha: parsedDate.toISOString().slice(0, 10),
+      cierreHora: parsedDate.toTimeString().slice(0, 5),
+    }
+  }
+
+  if (value.includes('T')) {
+    const [rawDate, rawHour] = value.split('T')
+    return {
+      cierreFecha: rawDate ?? '',
+      cierreHora: (rawHour ?? '').slice(0, 5),
+    }
+  }
+
+  return { cierreFecha: value, cierreHora: '' }
+}
 
 const OrganizerTournamentManagePage = () => {
   const { id } = useParams<{ id: string }>()
@@ -122,12 +162,23 @@ const OrganizerTournamentManagePage = () => {
     setConfigurationError(null)
     try {
       const configuration = await obtenerConfiguracionTorneo(tournamentId)
+      const closeDateTime = parseCloseDateTime(
+        configuration.cierreInscripciones,
+        configuration.cierreInscripcionesFecha,
+        configuration.cierreInscripcionesHora
+      )
+
       setConfigurationForm({
         reglamento: configuration.reglamento,
-        cierreInscripciones: configuration.cierreInscripciones,
-        canchas: configuration.canchas.join('\n'),
-        horarios: configuration.horarios.join('\n'),
-        sanciones: configuration.sanciones.join('\n'),
+        fechasImportantes: uniqueValues(configuration.fechasImportantes ?? []),
+        nuevaFechaImportante: '',
+        cierreFecha: closeDateTime.cierreFecha,
+        cierreHora: closeDateTime.cierreHora,
+        horariosPartidos: uniqueValues(configuration.horarios),
+        nuevoHorarioPartido: '',
+        canchas: uniqueValues(configuration.canchas),
+        sanciones: uniqueValues(configuration.sanciones),
+        nuevaSancion: '',
       })
     } catch (error) {
       setConfigurationError(
@@ -174,19 +225,82 @@ const OrganizerTournamentManagePage = () => {
     if (!configurationForm.reglamento.trim()) {
       next.reglamento = 'El reglamento es obligatorio.'
     }
-    if (!configurationForm.cierreInscripciones) {
-      next.cierreInscripciones = 'Debe definir el cierre de inscripciones.'
+    if (configurationForm.fechasImportantes.length === 0) {
+      next.fechasImportantes = 'Debe registrar al menos una fecha importante.'
     }
-    if (splitLines(configurationForm.canchas).length === 0) {
+    if (!configurationForm.cierreFecha) {
+      next.cierreFecha = 'Debe definir la fecha de cierre.'
+    }
+    if (!configurationForm.cierreHora) {
+      next.cierreHora = 'Debe definir la hora de cierre.'
+    }
+    if (configurationForm.canchas.length === 0) {
       next.canchas = 'Debe registrar al menos una cancha.'
     }
-    if (splitLines(configurationForm.horarios).length === 0) {
-      next.horarios = 'Debe registrar al menos un horario.'
+    if (configurationForm.horariosPartidos.length === 0) {
+      next.horariosPartidos = 'Debe registrar al menos un horario de partido.'
     }
-    if (splitLines(configurationForm.sanciones).length === 0) {
+    if (configurationForm.sanciones.length === 0) {
       next.sanciones = 'Debe registrar al menos una sancion.'
     }
     return next
+  }
+
+  const addImportantDate = () => {
+    if (!configurationForm.nuevaFechaImportante) return
+    setConfigurationForm(prev => ({
+      ...prev,
+      fechasImportantes: uniqueValues([...prev.fechasImportantes, prev.nuevaFechaImportante]),
+      nuevaFechaImportante: '',
+    }))
+  }
+
+  const removeImportantDate = (value: string) => {
+    setConfigurationForm(prev => ({
+      ...prev,
+      fechasImportantes: prev.fechasImportantes.filter(item => item !== value),
+    }))
+  }
+
+  const addMatchSchedule = () => {
+    if (!configurationForm.nuevoHorarioPartido.trim()) return
+    setConfigurationForm(prev => ({
+      ...prev,
+      horariosPartidos: uniqueValues([...prev.horariosPartidos, prev.nuevoHorarioPartido.trim()]),
+      nuevoHorarioPartido: '',
+    }))
+  }
+
+  const removeMatchSchedule = (value: string) => {
+    setConfigurationForm(prev => ({
+      ...prev,
+      horariosPartidos: prev.horariosPartidos.filter(item => item !== value),
+    }))
+  }
+
+  const addSanction = () => {
+    if (!configurationForm.nuevaSancion.trim()) return
+    setConfigurationForm(prev => ({
+      ...prev,
+      sanciones: uniqueValues([...prev.sanciones, prev.nuevaSancion.trim()]),
+      nuevaSancion: '',
+    }))
+  }
+
+  const removeSanction = (value: string) => {
+    setConfigurationForm(prev => ({
+      ...prev,
+      sanciones: prev.sanciones.filter(item => item !== value),
+    }))
+  }
+
+  const toggleCourt = (court: string) => {
+    setConfigurationForm(prev => ({
+      ...prev,
+      canchas: prev.canchas.includes(court)
+        ? prev.canchas.filter(item => item !== court)
+        : [...prev.canchas, court],
+    }))
   }
 
   const saveConfiguration = async (event: FormEvent<HTMLFormElement>) => {
@@ -202,17 +316,24 @@ const OrganizerTournamentManagePage = () => {
 
     const payload: TournamentConfiguration = {
       reglamento: configurationForm.reglamento.trim(),
-      cierreInscripciones: configurationForm.cierreInscripciones,
-      canchas: splitLines(configurationForm.canchas),
-      horarios: splitLines(configurationForm.horarios),
-      sanciones: splitLines(configurationForm.sanciones),
+      cierreInscripciones: `${configurationForm.cierreFecha}T${configurationForm.cierreHora}`,
+      cierreInscripcionesFecha: configurationForm.cierreFecha,
+      cierreInscripcionesHora: configurationForm.cierreHora,
+      fechasImportantes: configurationForm.fechasImportantes,
+      canchas: configurationForm.canchas,
+      horarios: configurationForm.horariosPartidos,
+      sanciones: configurationForm.sanciones,
     }
 
     setSavingConfiguration(true)
     try {
       await guardarConfiguracionTorneo(id, payload)
-      pushMessage('success', 'Configuracion guardada correctamente.')
-      await loadTournament(id)
+      navigate('/organizador', {
+        state: {
+          message: 'Configuracion guardada correctamente.',
+          type: 'success',
+        },
+      })
     } catch (error) {
       pushMessage('error', extractApiErrorMessage(error, 'No se pudo guardar la configuracion.'))
     } finally {
@@ -435,6 +556,7 @@ const OrganizerTournamentManagePage = () => {
                       setConfigurationForm(prev => ({ ...prev, reglamento: event.target.value }))
                     }
                     className={configurationErrors.reglamento ? 'organizer-input-error' : ''}
+                    placeholder="Escribe las reglas del torneo..."
                   />
                   {configurationErrors.reglamento && (
                     <p className="organizer-error-text">{configurationErrors.reglamento}</p>
@@ -442,73 +564,179 @@ const OrganizerTournamentManagePage = () => {
                 </div>
 
                 <div className="organizer-field">
-                  <label htmlFor="cierreInscripciones">Cierre de inscripciones</label>
-                  <input
-                    id="cierreInscripciones"
-                    type="date"
-                    value={configurationForm.cierreInscripciones}
-                    onChange={event =>
-                      setConfigurationForm(prev => ({
-                        ...prev,
-                        cierreInscripciones: event.target.value,
-                      }))
-                    }
-                    className={
-                      configurationErrors.cierreInscripciones ? 'organizer-input-error' : ''
-                    }
-                  />
-                  {configurationErrors.cierreInscripciones && (
-                    <p className="organizer-error-text">
-                      {configurationErrors.cierreInscripciones}
-                    </p>
+                  <label htmlFor="nuevaFechaImportante">Fechas importantes</label>
+                  <div className="organizer-list-input">
+                    <DatePickerInput
+                      id="nuevaFechaImportante"
+                      value={configurationForm.nuevaFechaImportante}
+                      onChange={value =>
+                        setConfigurationForm(prev => ({
+                          ...prev,
+                          nuevaFechaImportante: value,
+                        }))
+                      }
+                      placeholder="Selecciona fecha"
+                    />
+                    <button
+                      type="button"
+                      className="organizer-btn organizer-btn-primary"
+                      onClick={addImportantDate}
+                    >
+                      Añadir fecha
+                    </button>
+                  </div>
+                  {configurationErrors.fechasImportantes && (
+                    <p className="organizer-error-text">{configurationErrors.fechasImportantes}</p>
                   )}
+                  <div className="organizer-chip-list">
+                    {configurationForm.fechasImportantes.map(date => (
+                      <span key={date} className="organizer-chip">
+                        {formatDate(date)}
+                        <button
+                          type="button"
+                          onClick={() => removeImportantDate(date)}
+                          className="organizer-chip-remove"
+                        >
+                          ×
+                        </button>
+                      </span>
+                    ))}
+                  </div>
                 </div>
 
                 <div className="organizer-form-grid">
                   <div className="organizer-field">
-                    <label htmlFor="canchas">Canchas (una por linea)</label>
-                    <textarea
-                      id="canchas"
-                      value={configurationForm.canchas}
-                      onChange={event =>
-                        setConfigurationForm(prev => ({ ...prev, canchas: event.target.value }))
+                    <label htmlFor="cierreFecha">Cierre de inscripciones - Fecha de cierre</label>
+                    <DatePickerInput
+                      id="cierreFecha"
+                      value={configurationForm.cierreFecha}
+                      onChange={value =>
+                        setConfigurationForm(prev => ({ ...prev, cierreFecha: value }))
                       }
-                      className={configurationErrors.canchas ? 'organizer-input-error' : ''}
+                      hasError={Boolean(configurationErrors.cierreFecha)}
+                      placeholder="Seleccionar fecha"
                     />
-                    {configurationErrors.canchas && (
-                      <p className="organizer-error-text">{configurationErrors.canchas}</p>
+                    {configurationErrors.cierreFecha && (
+                      <p className="organizer-error-text">{configurationErrors.cierreFecha}</p>
                     )}
                   </div>
 
                   <div className="organizer-field">
-                    <label htmlFor="horarios">Horarios (una por linea)</label>
-                    <textarea
-                      id="horarios"
-                      value={configurationForm.horarios}
-                      onChange={event =>
-                        setConfigurationForm(prev => ({ ...prev, horarios: event.target.value }))
+                    <label htmlFor="cierreHora">Cierre de inscripciones - Hora de cierre</label>
+                    <TimePickerInput
+                      id="cierreHora"
+                      value={configurationForm.cierreHora}
+                      onChange={value =>
+                        setConfigurationForm(prev => ({ ...prev, cierreHora: value }))
                       }
-                      className={configurationErrors.horarios ? 'organizer-input-error' : ''}
+                      hasError={Boolean(configurationErrors.cierreHora)}
+                      placeholder="Seleccionar hora"
                     />
-                    {configurationErrors.horarios && (
-                      <p className="organizer-error-text">{configurationErrors.horarios}</p>
+                    {configurationErrors.cierreHora && (
+                      <p className="organizer-error-text">{configurationErrors.cierreHora}</p>
                     )}
                   </div>
                 </div>
 
                 <div className="organizer-field">
-                  <label htmlFor="sanciones">Sanciones (una por linea)</label>
-                  <textarea
-                    id="sanciones"
-                    value={configurationForm.sanciones}
-                    onChange={event =>
-                      setConfigurationForm(prev => ({ ...prev, sanciones: event.target.value }))
-                    }
-                    className={configurationErrors.sanciones ? 'organizer-input-error' : ''}
-                  />
+                  <label htmlFor="nuevoHorarioPartido">Horarios de partidos</label>
+                  <div className="organizer-list-input">
+                    <input
+                      id="nuevoHorarioPartido"
+                      value={configurationForm.nuevoHorarioPartido}
+                      onChange={event =>
+                        setConfigurationForm(prev => ({
+                          ...prev,
+                          nuevoHorarioPartido: event.target.value,
+                        }))
+                      }
+                      placeholder="Ej: Sabado 08:00 - Jornada 1"
+                    />
+                    <button
+                      type="button"
+                      className="organizer-btn organizer-btn-primary"
+                      onClick={addMatchSchedule}
+                    >
+                      Añadir partido
+                    </button>
+                  </div>
+                  {configurationErrors.horariosPartidos && (
+                    <p className="organizer-error-text">{configurationErrors.horariosPartidos}</p>
+                  )}
+                  <div className="organizer-chip-list">
+                    {configurationForm.horariosPartidos.map(schedule => (
+                      <span key={schedule} className="organizer-chip">
+                        {schedule}
+                        <button
+                          type="button"
+                          onClick={() => removeMatchSchedule(schedule)}
+                          className="organizer-chip-remove"
+                        >
+                          ×
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="organizer-field">
+                  <label>Canchas</label>
+                  <div className="organizer-checkbox-grid">
+                    {AVAILABLE_COURTS.map(court => (
+                      <label key={court} className="organizer-checkbox-item">
+                        <input
+                          type="checkbox"
+                          checked={configurationForm.canchas.includes(court)}
+                          onChange={() => toggleCourt(court)}
+                        />
+                        <span>{court}</span>
+                      </label>
+                    ))}
+                  </div>
+                  {configurationErrors.canchas && (
+                    <p className="organizer-error-text">{configurationErrors.canchas}</p>
+                  )}
+                </div>
+
+                <div className="organizer-field">
+                  <label htmlFor="nuevaSancion">Sanciones</label>
+                  <div className="organizer-list-input">
+                    <input
+                      id="nuevaSancion"
+                      value={configurationForm.nuevaSancion}
+                      onChange={event =>
+                        setConfigurationForm(prev => ({
+                          ...prev,
+                          nuevaSancion: event.target.value,
+                        }))
+                      }
+                      placeholder="Ej: Tarjeta roja directa = 1 fecha"
+                    />
+                    <button
+                      type="button"
+                      className="organizer-btn organizer-btn-primary"
+                      onClick={addSanction}
+                    >
+                      Añadir sancion
+                    </button>
+                  </div>
                   {configurationErrors.sanciones && (
                     <p className="organizer-error-text">{configurationErrors.sanciones}</p>
                   )}
+                  <div className="organizer-chip-list">
+                    {configurationForm.sanciones.map(sanction => (
+                      <span key={sanction} className="organizer-chip">
+                        {sanction}
+                        <button
+                          type="button"
+                          onClick={() => removeSanction(sanction)}
+                          className="organizer-chip-remove"
+                        >
+                          ×
+                        </button>
+                      </span>
+                    ))}
+                  </div>
                 </div>
 
                 <div className="organizer-inline-actions">
@@ -517,7 +745,9 @@ const OrganizerTournamentManagePage = () => {
                     className="organizer-btn organizer-btn-primary"
                     disabled={savingConfiguration}
                   >
-                    {savingConfiguration ? 'Guardando...' : 'Guardar configuracion'}
+                    {savingConfiguration
+                      ? 'Guardando configuracion...'
+                      : 'Guardar configuracion y volver al panel'}
                   </button>
                 </div>
               </form>

@@ -34,6 +34,7 @@ export const formatDateTime = (value: string): string => {
 
 export const tournamentStatusLabel = (status: TournamentStatus): string => {
   const normalized = normalizeState(status)
+  if (normalized === 'CREADO') return 'Creado'
   if (normalized === 'EN_CURSO' || normalized === 'ACTIVO') return 'En curso'
   if (normalized === 'FINALIZADO') return 'Finalizado'
   if (normalized === 'CONFIGURADO') return 'Configurado'
@@ -45,6 +46,7 @@ export const tournamentStatusLabel = (status: TournamentStatus): string => {
 export const paymentStatusLabel = (status: string): string => {
   const normalized = normalizeState(status)
   if (normalized === 'PENDIENTE') return 'Pendiente'
+  if (normalized === 'EN_REVISION') return 'En revision'
   if (normalized === 'APROBADO') return 'Aprobado'
   if (normalized === 'RECHAZADO') return 'Rechazado'
   return status
@@ -53,12 +55,14 @@ export const paymentStatusLabel = (status: string): string => {
 export const stateClassName = (status: string): string => {
   const normalized = normalizeState(status).toLowerCase()
   if (normalized === 'activo') return 'organizer-badge-en_curso'
+  if (normalized === 'creado') return 'organizer-badge-borrador'
+  if (normalized === 'en_revision') return 'organizer-badge-pendiente'
   return `organizer-badge-${normalized}`
 }
 
 export const canStartTournament = (status: TournamentStatus): boolean => {
   const normalized = normalizeState(status)
-  return normalized === 'CONFIGURADO' || normalized === 'BORRADOR'
+  return normalized === 'CONFIGURADO' || normalized === 'BORRADOR' || normalized === 'CREADO'
 }
 
 export const canFinishTournament = (status: TournamentStatus): boolean => {

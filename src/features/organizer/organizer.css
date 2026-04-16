@@ -108,6 +108,20 @@
   padding: 1rem 1rem 1.2rem;
 }
 
+.organizer-create-panel {
+  width: min(720px, 100%);
+  margin: 0 auto;
+  padding: 1.45rem 1.85rem 1.35rem;
+}
+
+.organizer-create-form {
+  gap: 0.95rem;
+}
+
+.organizer-create-grid {
+  gap: 1rem;
+}
+
 .organizer-panel h2,
 .organizer-panel h3 {
   margin: 0 0 0.85rem;
@@ -287,6 +301,83 @@
   flex-wrap: wrap;
 }
 
+.organizer-list-input {
+  display: flex;
+  gap: 0.55rem;
+}
+
+.organizer-list-input .organizer-btn {
+  white-space: nowrap;
+}
+
+.organizer-chip-list {
+  margin-top: 0.55rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.organizer-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background-color: #f2f5f3;
+  border: 1px solid #d9e4dd;
+  color: #1f3b2a;
+  font-size: 0.78rem;
+  border-radius: 999px;
+  padding: 0.25rem 0.5rem;
+}
+
+.organizer-chip-remove {
+  border: 0;
+  background-color: transparent;
+  color: #5d5d5d;
+  font-size: 0.95rem;
+  line-height: 1;
+  padding: 0;
+}
+
+.organizer-checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.organizer-checkbox-item {
+  border: 1px solid #d6ddd9;
+  border-radius: 8px;
+  padding: 0.5rem 0.55rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  color: #303030;
+}
+
+.organizer-create-actions {
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: 0.45rem;
+  gap: 0.7rem;
+}
+
+.organizer-create-submit {
+  min-width: 140px;
+  text-transform: none;
+}
+
+.organizer-btn-link {
+  background-color: transparent;
+  border: 0;
+  color: #7a7a7a;
+  padding: 0.35rem 0.25rem;
+}
+
+.organizer-btn-link:hover:not(:disabled) {
+  color: #1f1f1f;
+}
+
 @media (max-width: 1024px) {
   .organizer-summary-grid,
   .organizer-actions {
@@ -296,11 +387,19 @@
   .organizer-grid-2 {
     grid-template-columns: 1fr;
   }
+
+  .organizer-checkbox-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 720px) {
   .organizer-container {
     width: min(1120px, 100% - 1rem);
+  }
+
+  .organizer-create-panel {
+    padding: 1.15rem 1rem;
   }
 
   .organizer-banner h1 {
@@ -314,5 +413,13 @@
 
   .organizer-form-grid {
     grid-template-columns: 1fr;
+  }
+
+  .organizer-list-input {
+    flex-direction: column;
+  }
+
+  .organizer-checkbox-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
