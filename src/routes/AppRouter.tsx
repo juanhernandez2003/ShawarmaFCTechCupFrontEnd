@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Outlet, Navigate } from 'react-router-dom'
 import PrivateRoute from './PrivateRoute'
+import RoleRoute from './RoleRoute'
 import PublicLayout from '../components/layout/PublicLayout'
 import AuthLayout from '../components/layout/AuthLayout'
 import DashboardLayout from '../components/layout/DashboardLayout'
@@ -7,6 +8,7 @@ import LoginPage from '../pages/LoginPage'
 import RegisterPage from '../pages/RegisterPage'
 import HomePage from '../pages/HomePage'
 import NotFoundPage from '../pages/NotFoundPage'
+import SinPermisoPage from '../pages/SinPermisoPage'
 import TeamListPage from '../features/teams/TeamListPage'
 import TeamDetailPage from '../features/teams/TeamDetailPage'
 import TeamRegisterPage from '../features/teams/TeamRegisterPage'
@@ -15,6 +17,7 @@ import TorneoDetallePage from '../features/torneos/TorneoDetallePage'
 import TablaPage from '../features/torneos/TablaPage'
 import GoleadoresPage from '../features/torneos/GoleadoresPage'
 import EquiposPage from '../features/torneos/EquiposPage'
+import LlavesPage from '../features/torneos/LlavesPage'
 import CrearPerfilPage from '../features/players/CrearPerfilPage'
 import ArbitroPanelPage from '../features/arbitro/ArbitroPanelPage'
 import AlineacionesArbitroPage from '../features/arbitro/AlineacionesArbitroPage'
@@ -26,7 +29,6 @@ import OrganizerDashboardPage from '../features/organizer/OrganizerDashboardPage
 import OrganizerCreateTournamentPage from '../features/organizer/OrganizerCreateTournamentPage'
 import OrganizerTournamentManagePage from '../features/organizer/OrganizerTournamentManagePage'
 import OAuth2CallbackPage from '../pages/OAuth2CallbackPage'
-
 
 const AppRouter = () => {
   return (
@@ -107,7 +109,24 @@ const AppRouter = () => {
           <Route path="/equipos/:id" element={<TeamDetailPage />} />
           <Route path="/equipos/registro" element={<TeamRegisterPage />} />
           <Route path="/perfil" element={<NotFoundPage />} />
-          <Route path="/perfil/crear" element={<CrearPerfilPage />} />
+
+          <Route
+            path="/perfil/crear"
+            element={
+              <RoleRoute roles={['JUGADOR', 'CAPITAN']}>
+                <CrearPerfilPage />
+              </RoleRoute>
+            }
+          />
+
+          <Route
+            path="/admin/auditoria"
+            element={
+              <RoleRoute roles={['ADMINISTRADOR']}>
+                <AuditoriaPage />
+              </RoleRoute>
+            }
+          />
         </Route>
 
         {/* Ruta no encontrada */}
