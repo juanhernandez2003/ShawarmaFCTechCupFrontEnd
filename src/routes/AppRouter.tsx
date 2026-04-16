@@ -25,6 +25,7 @@ import PartidosArbitroPage from '../features/arbitro/PartidosArbitroPage'
 import OrganizerDashboardPage from '../features/organizer/OrganizerDashboardPage'
 import OrganizerCreateTournamentPage from '../features/organizer/OrganizerCreateTournamentPage'
 import OrganizerTournamentManagePage from '../features/organizer/OrganizerTournamentManagePage'
+import OAuth2CallbackPage from '../pages/OAuth2CallbackPage'
 
 
 const AppRouter = () => {
@@ -60,6 +61,7 @@ const AppRouter = () => {
         </Route>
 
         <Route path="/registro" element={<RegisterPage />} />
+        <Route path="/oauth2/callback" element={<OAuth2CallbackPage />} />
 
         {/* Rutas protegidas */}
         <Route
