@@ -94,7 +94,7 @@ export default function RegisterPage() {
     setErrorGeneral('')
 
     try {
-      await apiClient.post('/api/users/players', {
+      await apiClient.post('/api/access/register', {
         nombre: nombre.trim() + ' ' + apellido.trim(),
         email: correo,
         password: contrasena,
