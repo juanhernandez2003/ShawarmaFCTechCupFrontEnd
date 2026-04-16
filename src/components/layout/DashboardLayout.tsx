@@ -6,13 +6,15 @@ import logo from '../../assets/logo.png'
 
 interface DashboardLayoutProps {
   children: ReactNode
+  navLinks?: Array<{ label: string; to: string }>
+  roleLabel?: string
 }
 
-const navLinks = [
+const defaultNavLinks = [
   { label: 'Inicio', to: '/dashboard' },
   { label: 'Torneos', to: '/torneos' },
   { label: 'Equipos', to: '/equipos' },
-  { label: 'Configuración', to: '/configuracion' },
+  { label: 'Configuracion', to: '/configuracion' },
 ]
 
 const getInitials = (nombre: string): string => {
@@ -21,7 +23,11 @@ const getInitials = (nombre: string): string => {
   return (parts[0][0] + parts[1][0]).toUpperCase()
 }
 
-const DashboardLayout = ({ children }: DashboardLayoutProps) => {
+const DashboardLayout = ({
+  children,
+  navLinks = defaultNavLinks,
+  roleLabel,
+}: DashboardLayoutProps) => {
   const user = useAuthStore(state => state.user)
   const [hoveredLink, setHoveredLink] = useState<string | null>(null)
   const navigate = useNavigate()
@@ -32,7 +38,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   }
 
   const initials = user ? getInitials(user.correo) : '?'
-  const rol = user ? user.rol : 'Invitado'
+  const rol = roleLabel ?? (user ? user.rol : 'Invitado')
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
@@ -113,7 +119,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
               fontFamily: 'Montserrat, sans-serif',
             }}
           >
-            Cerrar sesión
+            Cerrar sesion
           </button>
         </div>
       </header>

@@ -29,11 +29,15 @@ const labelStyle: CSSProperties = {
 const getRutaPorRol = (rol: string): string => {
   switch (rol) {
     case 'ADMINISTRADOR':
-      return '/dashboard'
+    case 'ORGANIZADOR':
+      return '/organizador'
     case 'CAPITAN':
       return '/equipos/registro'
     case 'JUGADOR':
+    case 'FAMILIAR':
       return '/equipos'
+    case 'ARBITRO':
+      return '/arbitro'
     default:
       return '/dashboard'
   }

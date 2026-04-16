@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Outlet, Navigate } from 'react-router-dom'
 import PrivateRoute from './PrivateRoute'
 import RoleRoute from './RoleRoute'
 import PublicLayout from '../components/layout/PublicLayout'
@@ -19,8 +19,17 @@ import GoleadoresPage from '../features/torneos/GoleadoresPage'
 import EquiposPage from '../features/torneos/EquiposPage'
 import LlavesPage from '../features/torneos/LlavesPage'
 import CrearPerfilPage from '../features/players/CrearPerfilPage'
-import AdminDashboardPage from '../features/admin/AdminDashboardPage'
+import ArbitroPanelPage from '../features/arbitro/ArbitroPanelPage'
+import AlineacionesArbitroPage from '../features/arbitro/AlineacionesArbitroPage'
+import ReglamentoArbitroPage from '../features/arbitro/ReglamentoArbitroPage'
+import TablaPosicionesArbitroPage from '../features/arbitro/TablaPosicionesArbitroPage'
+import LlavesArbitroPage from '../features/arbitro/LlavesArbitroPage'
+import PartidosArbitroPage from '../features/arbitro/PartidosArbitroPage'
 import AuditoriaPage from '../features/admin/AuditoriaPage'
+import OrganizerDashboardPage from '../features/organizer/OrganizerDashboardPage'
+import OrganizerCreateTournamentPage from '../features/organizer/OrganizerCreateTournamentPage'
+import OrganizerTournamentManagePage from '../features/organizer/OrganizerTournamentManagePage'
+import OAuth2CallbackPage from '../pages/OAuth2CallbackPage'
 
 const AppRouter = () => {
   return (
@@ -55,9 +64,34 @@ const AppRouter = () => {
         </Route>
 
         <Route path="/registro" element={<RegisterPage />} />
-        <Route path="/sin-permiso" element={<SinPermisoPage />} />
+        <Route path="/oauth2/callback" element={<OAuth2CallbackPage />} />
 
         {/* Rutas protegidas */}
+        <Route
+          element={
+            <PrivateRoute>
+              <DashboardLayout
+                roleLabel="Arbitro"
+                navLinks={[
+                  { label: 'Inicio', to: '/arbitro' },
+                  { label: 'Torneos', to: '/torneos' },
+                  { label: 'Equipos', to: '/equipos' },
+                  { label: 'Reglamento', to: '/arbitro/reglamento' },
+                ]}
+              >
+                <Outlet />
+              </DashboardLayout>
+            </PrivateRoute>
+          }
+        >
+          <Route path="/arbitro" element={<ArbitroPanelPage />} />
+          <Route path="/arbitro/partidos" element={<PartidosArbitroPage />} />
+          <Route path="/arbitro/alineaciones" element={<AlineacionesArbitroPage />} />
+          <Route path="/arbitro/reglamento" element={<ReglamentoArbitroPage />} />
+          <Route path="/arbitro/tabla" element={<TablaPosicionesArbitroPage />} />
+          <Route path="/arbitro/tabla/llaves" element={<LlavesArbitroPage />} />
+        </Route>
+
         <Route
           element={
             <PrivateRoute>
@@ -67,44 +101,14 @@ const AppRouter = () => {
             </PrivateRoute>
           }
         >
-          <Route path="/torneos/:id/llaves" element={<LlavesPage />} />
-
-          <Route
-            path="/dashboard"
-            element={
-              <RoleRoute roles={['ADMINISTRADOR']}>
-                <AdminDashboardPage />
-              </RoleRoute>
-            }
-          />
-
-          <Route
-            path="/equipos"
-            element={
-              <RoleRoute roles={['JUGADOR', 'CAPITAN', 'ADMINISTRADOR']}>
-                <TeamListPage />
-              </RoleRoute>
-            }
-          />
-
-          <Route
-            path="/equipos/:id"
-            element={
-              <RoleRoute roles={['JUGADOR', 'CAPITAN', 'ADMINISTRADOR']}>
-                <TeamDetailPage />
-              </RoleRoute>
-            }
-          />
-
-          <Route
-            path="/equipos/registro"
-            element={
-              <RoleRoute roles={['CAPITAN']}>
-                <TeamRegisterPage />
-              </RoleRoute>
-            }
-          />
-
+          <Route path="/dashboard" element={<Navigate to="/organizador" replace />} />
+          <Route path="/organizador" element={<OrganizerDashboardPage />} />
+          <Route path="/organizador/torneos/crear" element={<OrganizerCreateTournamentPage />} />
+          <Route path="/organizador/torneos/:id" element={<OrganizerTournamentManagePage />} />
+          <Route path="/configuracion" element={<Navigate to="/organizador" replace />} />
+          <Route path="/equipos" element={<TeamListPage />} />
+          <Route path="/equipos/:id" element={<TeamDetailPage />} />
+          <Route path="/equipos/registro" element={<TeamRegisterPage />} />
           <Route path="/perfil" element={<NotFoundPage />} />
 
           <Route
