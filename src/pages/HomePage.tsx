@@ -1,8 +1,11 @@
 import { useNavigate } from 'react-router-dom'
 import estadio from '../assets/hero.png'
+import useAuthStore from '../store/authStore'
 
 const HomePage = () => {
   const navigate = useNavigate()
+  const token = useAuthStore(state => state.token)
+  const isLoggedIn = !!token
 
   return (
     <div style={{ fontFamily: 'Montserrat, sans-serif' }}>
@@ -17,7 +20,7 @@ const HomePage = () => {
           backgroundColor: '#0a1a0a',
         }}
       >
-        {/* Fondo estadio */}
+        {/* Fondo estadio con imagen real */}
         <div
           style={{
             position: 'absolute',
@@ -28,21 +31,57 @@ const HomePage = () => {
           }}
         />
 
-        {/* Luces del estadio */}
-        {['-20%', '120%'].map((left, i) => (
-          <div
-            key={i}
-            style={{
-              position: 'absolute',
-              top: '-10%',
-              left,
-              width: '300px',
-              height: '300px',
-              background: 'radial-gradient(ellipse, rgba(255,255,255,0.06) 0%, transparent 70%)',
-              pointerEvents: 'none',
-            }}
-          />
-        ))}
+        {/* Líneas de cancha decorativas */}
+        <div
+          style={{
+            position: 'absolute',
+            bottom: 0,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: '600px',
+            height: '200px',
+            border: '2px solid rgba(255,255,255,0.08)',
+            borderBottom: 'none',
+            borderRadius: '300px 300px 0 0',
+          }}
+        />
+        <div
+          style={{
+            position: 'absolute',
+            bottom: 0,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: '2px',
+            height: '100%',
+            backgroundColor: 'rgba(255,255,255,0.05)',
+          }}
+        />
+        <div
+          style={{
+            position: 'absolute',
+            bottom: '20px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: '80px',
+            height: '80px',
+            border: '2px solid rgba(255,255,255,0.08)',
+            borderRadius: '50%',
+          }}
+        />
+
+        {/* Pelota */}
+        <div
+          style={{
+            position: 'absolute',
+            bottom: '30px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            fontSize: '2.5rem',
+            opacity: 0.6,
+          }}
+        >
+          ⚽
+        </div>
 
         {/* Contenido hero */}
         <div style={{ position: 'relative', zIndex: 1, padding: '4rem 3rem', maxWidth: '600px' }}>
@@ -129,171 +168,173 @@ const HomePage = () => {
         </div>
       </div>
 
-      {/* SECCIÓN TU CAMINO A LA GLORIA */}
-      <div style={{ backgroundColor: '#ffffff', padding: '3rem 2rem' }}>
-        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-          <p
-            style={{
-              margin: '0 0 0.25rem',
-              fontSize: '0.8rem',
-              color: '#11823B',
-              fontWeight: 'bold',
-              textTransform: 'uppercase',
-              letterSpacing: '0.1em',
-              fontFamily: 'Montserrat, sans-serif',
-            }}
-          >
-            Proceso
-          </p>
-          <h2
-            style={{
-              margin: '0 0 2rem',
-              fontSize: '1.8rem',
-              fontWeight: '900',
-              fontFamily: 'Poppins, sans-serif',
-              color: '#000000',
-            }}
-          >
-            TU CAMINO A LA <span style={{ color: '#11823B' }}>GLORIA</span>
-          </h2>
-
-          <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
-            {/* Tarjeta Regístrate */}
-            <div
-              onClick={() => navigate('/registro')}
+      {/* SECCIÓN TU CAMINO A LA GLORIA — solo si NO está logueado */}
+      {!isLoggedIn && (
+        <div style={{ backgroundColor: '#ffffff', padding: '3rem 2rem' }}>
+          <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+            <p
               style={{
-                flex: 1,
-                minWidth: '200px',
-                backgroundColor: '#ffffff',
-                border: '1px solid #e0e0e0',
-                borderRadius: '8px',
-                padding: '2rem 1.5rem',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'flex-start',
-                gap: '1.25rem',
-                transition: 'box-shadow 0.2s ease',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-              }}
-              onMouseEnter={e => {
-                ;(e.currentTarget as HTMLDivElement).style.boxShadow =
-                  '0 4px 16px rgba(17,130,59,0.15)'
-              }}
-              onMouseLeave={e => {
-                ;(e.currentTarget as HTMLDivElement).style.boxShadow = '0 2px 8px rgba(0,0,0,0.06)'
+                margin: '0 0 0.25rem',
+                fontSize: '0.8rem',
+                color: '#11823B',
+                fontWeight: 'bold',
+                textTransform: 'uppercase',
+                letterSpacing: '0.1em',
+                fontFamily: 'Montserrat, sans-serif',
               }}
             >
-              <div
-                style={{
-                  width: '52px',
-                  height: '52px',
-                  borderRadius: '50%',
-                  backgroundColor: '#f0f9f4',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0,
-                  fontSize: '1.5rem',
-                }}
-              >
-                👤
-              </div>
-              <div>
-                <h3
-                  style={{
-                    margin: '0 0 0.4rem',
-                    fontSize: '0.95rem',
-                    fontWeight: 'bold',
-                    fontFamily: 'Poppins, sans-serif',
-                    color: '#000',
-                  }}
-                >
-                  REGÍSTRATE
-                </h3>
-                <p
-                  style={{
-                    margin: 0,
-                    fontSize: '0.82rem',
-                    color: '#737373',
-                    fontFamily: 'Montserrat, sans-serif',
-                    lineHeight: 1.5,
-                  }}
-                >
-                  Crea tu perfil de jugador y accede al panel.
-                </p>
-              </div>
-            </div>
-
-            {/* Tarjeta Inicia Sesión */}
-            <div
-              onClick={() => navigate('/login')}
+              Proceso
+            </p>
+            <h2
               style={{
-                flex: 1,
-                minWidth: '200px',
-                backgroundColor: '#ffffff',
-                border: '1px solid #e0e0e0',
-                borderRadius: '8px',
-                padding: '2rem 1.5rem',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'flex-start',
-                gap: '1.25rem',
-                transition: 'box-shadow 0.2s ease',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
-              }}
-              onMouseEnter={e => {
-                ;(e.currentTarget as HTMLDivElement).style.boxShadow =
-                  '0 4px 16px rgba(17,130,59,0.15)'
-              }}
-              onMouseLeave={e => {
-                ;(e.currentTarget as HTMLDivElement).style.boxShadow = '0 2px 8px rgba(0,0,0,0.06)'
+                margin: '0 0 2rem',
+                fontSize: '1.8rem',
+                fontWeight: '900',
+                fontFamily: 'Poppins, sans-serif',
+                color: '#000000',
               }}
             >
+              TU CAMINO A LA <span style={{ color: '#11823B' }}>GLORIA</span>
+            </h2>
+
+            <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
+              {/* Tarjeta Regístrate */}
               <div
+                onClick={() => navigate('/registro')}
                 style={{
-                  width: '52px',
-                  height: '52px',
-                  borderRadius: '50%',
-                  backgroundColor: '#f0f9f4',
+                  flex: 1,
+                  minWidth: '200px',
+                  backgroundColor: '#ffffff',
+                  border: '1px solid #e0e0e0',
+                  borderRadius: '8px',
+                  padding: '2rem 1.5rem',
+                  cursor: 'pointer',
                   display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0,
-                  fontSize: '1.5rem',
+                  alignItems: 'flex-start',
+                  gap: '1.25rem',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+                }}
+                onMouseEnter={e => {
+                  ;(e.currentTarget as HTMLDivElement).style.boxShadow =
+                    '0 4px 16px rgba(17,130,59,0.15)'
+                }}
+                onMouseLeave={e => {
+                  ;(e.currentTarget as HTMLDivElement).style.boxShadow =
+                    '0 2px 8px rgba(0,0,0,0.06)'
                 }}
               >
-                🏆
+                <div
+                  style={{
+                    width: '52px',
+                    height: '52px',
+                    borderRadius: '50%',
+                    backgroundColor: '#f0f9f4',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                    fontSize: '1.5rem',
+                  }}
+                >
+                  👤
+                </div>
+                <div>
+                  <h3
+                    style={{
+                      margin: '0 0 0.4rem',
+                      fontSize: '0.95rem',
+                      fontWeight: 'bold',
+                      fontFamily: 'Poppins, sans-serif',
+                      color: '#000',
+                    }}
+                  >
+                    REGÍSTRATE
+                  </h3>
+                  <p
+                    style={{
+                      margin: 0,
+                      fontSize: '0.82rem',
+                      color: '#737373',
+                      fontFamily: 'Montserrat, sans-serif',
+                      lineHeight: 1.5,
+                    }}
+                  >
+                    Crea tu perfil de jugador y accede al panel.
+                  </p>
+                </div>
               </div>
-              <div>
-                <h3
+
+              {/* Tarjeta Inicia Sesión */}
+              <div
+                onClick={() => navigate('/login')}
+                style={{
+                  flex: 1,
+                  minWidth: '200px',
+                  backgroundColor: '#ffffff',
+                  border: '1px solid #e0e0e0',
+                  borderRadius: '8px',
+                  padding: '2rem 1.5rem',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '1.25rem',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+                }}
+                onMouseEnter={e => {
+                  ;(e.currentTarget as HTMLDivElement).style.boxShadow =
+                    '0 4px 16px rgba(17,130,59,0.15)'
+                }}
+                onMouseLeave={e => {
+                  ;(e.currentTarget as HTMLDivElement).style.boxShadow =
+                    '0 2px 8px rgba(0,0,0,0.06)'
+                }}
+              >
+                <div
                   style={{
-                    margin: '0 0 0.4rem',
-                    fontSize: '0.95rem',
-                    fontWeight: 'bold',
-                    fontFamily: 'Poppins, sans-serif',
-                    color: '#000',
+                    width: '52px',
+                    height: '52px',
+                    borderRadius: '50%',
+                    backgroundColor: '#f0f9f4',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                    fontSize: '1.5rem',
                   }}
                 >
-                  INICIA SESIÓN
-                </h3>
-                <p
-                  style={{
-                    margin: 0,
-                    fontSize: '0.82rem',
-                    color: '#737373',
-                    fontFamily: 'Montserrat, sans-serif',
-                    lineHeight: 1.5,
-                  }}
-                >
-                  Participa en torneos y sigue tus estadísticas.
-                </p>
+                  🏆
+                </div>
+                <div>
+                  <h3
+                    style={{
+                      margin: '0 0 0.4rem',
+                      fontSize: '0.95rem',
+                      fontWeight: 'bold',
+                      fontFamily: 'Poppins, sans-serif',
+                      color: '#000',
+                    }}
+                  >
+                    INICIA SESIÓN
+                  </h3>
+                  <p
+                    style={{
+                      margin: 0,
+                      fontSize: '0.82rem',
+                      color: '#737373',
+                      fontFamily: 'Montserrat, sans-serif',
+                      lineHeight: 1.5,
+                    }}
+                  >
+                    Participa en torneos y sigue tus estadísticas.
+                  </p>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }
 
-export default HomePage
+export default <HomePage></HomePage>
