@@ -1,10 +1,17 @@
-import React from 'react'
-import { useState } from 'react'
+import React, { useState, useCallback, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import PageHeader from '../../components/common/PageHeader'
+import {
+  buscarJugadores,
+  enviarInvitacion,
+  type PerfilDeportivo,
+} from '../../services/capitanService'
+import useAuthStore from '../../store/authStore'
+import { obtenerEquipoDelCapitan } from '../../services/teamService'
 
 const BuscarJugadoresPage = () => {
   const navigate = useNavigate()
+  const user = useAuthStore(state => state.user)
 
   const [nombre, setNombre] = useState('')
   const [posicion, setPosicion] = useState('')
@@ -12,12 +19,44 @@ const BuscarJugadoresPage = () => {
   const [genero, setGenero] = useState('')
   const [edad, setEdad] = useState('')
 
+  const [equipoId, setEquipoId] = useState('')
+  const [resultados, setResultados] = useState<PerfilDeportivo[]>([])
+  const [buscando, setBuscando] = useState(false)
+  const [errorBusqueda, setErrorBusqueda] = useState('')
+
+  useEffect(() => {
+    obtenerEquipoDelCapitan(user?.correo ?? '').then(equipo => {
+      if (equipo) setEquipoId(equipo.id)
+    })
+  }, [user?.correo])
+
+  const handleBuscar = useCallback(async () => {
+    setBuscando(true)
+    setErrorBusqueda('')
+    try {
+      const data = await buscarJugadores(user?.correo ?? '', {
+        posicion,
+        semestre,
+        genero,
+        edad,
+        nombre: nombre || undefined,
+      })
+      setResultados(data)
+    } catch {
+      setErrorBusqueda('Error al buscar jugadores')
+    } finally {
+      setBuscando(false)
+    }
+  }, [user?.correo, posicion, semestre, genero, edad, nombre])
+
   const limpiarFiltros = () => {
     setNombre('')
     setPosicion('')
     setSemestre('')
     setGenero('')
     setEdad('')
+    setResultados([])
+    setErrorBusqueda('')
   }
 
   const labelStyle: React.CSSProperties = {
@@ -145,6 +184,7 @@ const BuscarJugadoresPage = () => {
             </div>
 
             <button
+              onClick={handleBuscar}
               style={{
                 width: '100%',
                 backgroundColor: '#11823B',
@@ -191,32 +231,115 @@ const BuscarJugadoresPage = () => {
               Jugadores según el filtro
             </p>
 
-            <div
-              style={{
-                backgroundColor: 'white',
-                borderRadius: '8px',
-                padding: '2rem',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                minHeight: '300px',
-              }}
-            >
-              <span style={{ fontSize: '4rem', color: '#D9D9D9' }}>👤</span>
-              <p
+            {buscando && (
+              <p style={{ textAlign: 'center', color: '#737373', marginTop: '2rem' }}>
+                Buscando jugadores...
+              </p>
+            )}
+
+            {!buscando && errorBusqueda && (
+              <p style={{ textAlign: 'center', color: '#E53E3E', marginTop: '2rem' }}>
+                {errorBusqueda}
+              </p>
+            )}
+
+            {!buscando && !errorBusqueda && resultados.length === 0 && (
+              <div
                 style={{
-                  fontSize: '0.9rem',
-                  color: '#737373',
-                  textAlign: 'center',
-                  marginTop: '1rem',
-                  maxWidth: '300px',
+                  backgroundColor: 'white',
+                  borderRadius: '8px',
+                  padding: '2rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  minHeight: '300px',
                 }}
               >
-                Encuentra jugadores disponibles y añádelos a tu equipo según posición, semestre,
-                género y edad
-              </p>
-            </div>
+                <span style={{ fontSize: '4rem', color: '#D9D9D9' }}>👤</span>
+                <p
+                  style={{
+                    fontSize: '0.9rem',
+                    color: '#737373',
+                    textAlign: 'center',
+                    marginTop: '1rem',
+                    maxWidth: '300px',
+                  }}
+                >
+                  Encuentra jugadores disponibles y añádelos a tu equipo según posición, semestre,
+                  género y edad
+                </p>
+              </div>
+            )}
+
+            {!buscando && resultados.length > 0 && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                {resultados.map(jugador => (
+                  <div
+                    key={jugador.id}
+                    style={{
+                      backgroundColor: 'white',
+                      borderRadius: '8px',
+                      padding: '1rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '1rem',
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: '40px',
+                        height: '40px',
+                        borderRadius: '50%',
+                        backgroundColor: '#D9D9D9',
+                        flexShrink: 0,
+                      }}
+                    />
+                    <div style={{ flex: 1 }}>
+                      <p
+                        style={{ fontWeight: 'bold', fontSize: '0.85rem', margin: '0 0 0.25rem 0' }}
+                      >
+                        {jugador.jugadorId}
+                      </p>
+                      <p style={{ fontSize: '0.8rem', color: '#737373', margin: 0 }}>
+                        {jugador.posiciones.join(', ')} · Dorsal {jugador.dorsal} · Semestre{' '}
+                        {jugador.semestre} · {jugador.genero} · {jugador.edad} años
+                      </p>
+                    </div>
+                    <button
+                      onClick={async () => {
+                        if (!equipoId) {
+                          alert('❌ No tienes un equipo registrado')
+                          return
+                        }
+                        try {
+                          await enviarInvitacion(
+                            jugador.jugadorId,
+                            equipoId,
+                            jugador.posiciones[0] ?? 'DELANTERO'
+                          )
+                          alert('✅ Invitación enviada correctamente')
+                        } catch {
+                          alert('❌ Error al enviar la invitación')
+                        }
+                      }}
+                      style={{
+                        backgroundColor: '#11823B',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '4px',
+                        padding: '0.35rem 0.75rem',
+                        fontSize: '0.8rem',
+                        cursor: 'pointer',
+                        flexShrink: 0,
+                      }}
+                    >
+                      Invitar
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 

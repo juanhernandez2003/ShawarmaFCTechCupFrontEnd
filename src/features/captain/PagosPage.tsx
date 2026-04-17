@@ -1,24 +1,61 @@
-import React from 'react'
-import { useRef, useState } from 'react'
+import React, { useRef, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import PageHeader from '../../components/common/PageHeader'
+import useAuthStore from '../../store/authStore'
+import { subirComprobante } from '../../services/capitanService'
+import { obtenerEquipoDelCapitan } from '../../services/teamService'
 
 const pasos = ['Pendiente', 'En revisión', 'Aprobado', 'Rechazado']
 const pasoActivo = 0
 
 const PagosPage = () => {
   const navigate = useNavigate()
+  const user = useAuthStore(state => state.user)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [equipoId, setEquipoId] = useState('')
   const [archivoSeleccionado, setArchivoSeleccionado] = useState<File | null>(null)
+  const [urlComprobante, setUrlComprobante] = useState('')
+  const [subiendo, setSubiendo] = useState(false)
+  const [mensajeSubida, setMensajeSubida] = useState('')
+
+  useEffect(() => {
+    obtenerEquipoDelCapitan(user?.correo ?? '').then(equipo => {
+      if (equipo) setEquipoId(equipo.id)
+    })
+  }, [user?.correo])
 
   const handleArchivoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const archivo = e.target.files?.[0]
-    if (archivo) setArchivoSeleccionado(archivo)
+    if (archivo) {
+      setArchivoSeleccionado(archivo)
+      setUrlComprobante(`https://storage.techcup.com/${archivo.name}`)
+    }
   }
 
   const handleDescartar = () => {
     setArchivoSeleccionado(null)
+    setUrlComprobante('')
     if (fileInputRef.current) fileInputRef.current.value = ''
+  }
+
+  const handleConfirmarSubida = async () => {
+    if (!archivoSeleccionado) return
+    if (!equipoId) {
+      setMensajeSubida('❌ No tienes un equipo registrado')
+      return
+    }
+    setSubiendo(true)
+    setMensajeSubida('')
+    try {
+      await subirComprobante(equipoId, urlComprobante)
+      setMensajeSubida('✅ Comprobante subido exitosamente')
+    } catch {
+      setMensajeSubida('❌ Error al subir el comprobante')
+    } finally {
+      setSubiendo(false)
+      setArchivoSeleccionado(null)
+      if (fileInputRef.current) fileInputRef.current.value = ''
+    }
   }
 
   return (
@@ -178,21 +215,41 @@ const PagosPage = () => {
             />
 
             <button
-              onClick={() => fileInputRef.current?.click()}
+              onClick={
+                archivoSeleccionado ? handleConfirmarSubida : () => fileInputRef.current?.click()
+              }
+              disabled={subiendo}
               style={{
                 width: '100%',
-                backgroundColor: '#11823B',
+                backgroundColor: subiendo ? '#737373' : '#11823B',
                 color: 'white',
                 border: 'none',
                 borderRadius: '4px',
                 padding: '0.6rem',
-                cursor: 'pointer',
+                cursor: subiendo ? 'not-allowed' : 'pointer',
                 fontSize: '0.9rem',
                 marginTop: '1rem',
               }}
             >
-              {archivoSeleccionado ? 'Confirmar subida' : 'Subir Comprobante'}
+              {subiendo
+                ? 'Subiendo...'
+                : archivoSeleccionado
+                  ? 'Confirmar subida'
+                  : 'Subir Comprobante'}
             </button>
+
+            {mensajeSubida && (
+              <p
+                style={{
+                  fontSize: '0.85rem',
+                  textAlign: 'center',
+                  marginTop: '0.5rem',
+                  color: mensajeSubida.includes('✅') ? '#11823B' : '#E53E3E',
+                }}
+              >
+                {mensajeSubida}
+              </p>
+            )}
 
             {archivoSeleccionado && (
               <div

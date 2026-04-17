@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import PageHeader from '../../components/common/PageHeader'
+import useAuthStore from '../../store/authStore'
+import apiClient from '../../services/apiClient'
 
 interface StatCard {
   emoji: string
@@ -17,7 +19,17 @@ const statCards: StatCard[] = [
 
 const JugadorDashboardPage = () => {
   const navigate = useNavigate()
+  const user = useAuthStore(state => state.user)
   const [disponible, setDisponible] = useState<boolean>(true)
+
+  const handleToggleDisponibilidad = async () => {
+    try {
+      await apiClient.patch(`/api/users/players/${user?.correo}/availability`)
+      setDisponible(!disponible)
+    } catch {
+      alert('❌ Error al cambiar disponibilidad')
+    }
+  }
 
   return (
     <div>
@@ -234,7 +246,7 @@ const JugadorDashboardPage = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <span style={{ fontSize: '0.85rem' }}>Disponible</span>
             <div
-              onClick={() => setDisponible(!disponible)}
+              onClick={handleToggleDisponibilidad}
               style={{
                 width: '40px',
                 height: '22px',

@@ -38,6 +38,7 @@ import AlineacionPage from '../features/captain/AlineacionPage'
 import AlineacionRivalPage from '../features/captain/AlineacionRivalPage'
 import BuscarJugadoresPage from '../features/captain/BuscarJugadoresPage'
 import PagosPage from '../features/captain/PagosPage'
+import EquiposCapitanPage from '../features/captain/EquiposCapitanPage'
 
 const AppRouter = () => {
   return (
@@ -185,7 +186,7 @@ const AppRouter = () => {
           <Route path="/capitan/alineacion-rival" element={<AlineacionRivalPage />} />
           <Route path="/capitan/jugadores" element={<BuscarJugadoresPage />} />
           <Route path="/capitan/pagos" element={<PagosPage />} />
-          <Route path="/capitan/equipos" element={<TeamListPage />} />
+          <Route path="/capitan/equipos" element={<EquiposCapitanPage />} />
           <Route path="/capitan/equipos/:id" element={<TeamDetailPage />} />
           <Route path="/capitan/equipos/registro" element={<TeamRegisterPage />} />
         </Route>
