@@ -8,7 +8,7 @@ interface PublicLayoutProps {
   children: ReactNode
 }
 
-const navLinks = [
+const publicNavLinks = [
   { label: 'Inicio', to: '/' },
   { label: 'Torneos', to: '/torneos' },
   { label: 'Cómo funciona', to: '/como-funciona' },
@@ -53,6 +53,11 @@ const PublicLayout = ({ children }: PublicLayoutProps) => {
 
   const initials = user ? getInitials(user.correo) : '?'
   const rol = user ? user.rol : ''
+  const panelPath = getPanelPorRol(rol)
+
+  const navLinks = isLoggedIn
+    ? [...publicNavLinks, { label: 'Panel de Control', to: panelPath }]
+    : publicNavLinks
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
@@ -74,12 +79,12 @@ const PublicLayout = ({ children }: PublicLayoutProps) => {
         <nav style={{ display: 'flex', gap: '2rem' }}>
           {navLinks.map(link => (
             <Link
-              key={link.to}
+              key={link.label}
               to={link.to}
-              onMouseEnter={() => setHoveredLink(link.to)}
+              onMouseEnter={() => setHoveredLink(link.label)}
               onMouseLeave={() => setHoveredLink(null)}
               style={{
-                color: hoveredLink === link.to ? '#11823B' : '#000000',
+                color: hoveredLink === link.label ? '#11823B' : '#000000',
                 textDecoration: 'none',
                 fontSize: '0.95rem',
               }}
@@ -120,21 +125,6 @@ const PublicLayout = ({ children }: PublicLayoutProps) => {
             >
               {rol}
             </span>
-            <button
-              onClick={() => navigate(getPanelPorRol(rol))}
-              style={{
-                backgroundColor: 'transparent',
-                color: '#11823B',
-                border: '1px solid #11823B',
-                borderRadius: '4px',
-                padding: '0.35rem 0.85rem',
-                fontSize: '0.85rem',
-                cursor: 'pointer',
-                fontFamily: 'Montserrat, sans-serif',
-              }}
-            >
-              Panel de Control
-            </button>
             <button
               onClick={handleLogout}
               style={{
