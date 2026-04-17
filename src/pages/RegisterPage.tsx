@@ -7,13 +7,29 @@ import apiClient from '../services/apiClient'
 interface FormErrors {
   nombre: string
   apellido: string
+  tipoUsuario: string
   correo: string
   contrasena: string
+}
+
+const TIPOS_USUARIO = [
+  { value: 'ESTUDIANTE', label: 'Estudiante' },
+  { value: 'GRADUADO', label: 'Graduado' },
+  { value: 'PROFESOR', label: 'Profesor' },
+  { value: 'PERSONAL_ADMIN', label: 'Personal Administrativo' },
+  { value: 'FAMILIAR', label: 'Familiar' },
+]
+
+const getDominioHint = (tipo: string): string => {
+  if (tipo === 'FAMILIAR') return 'Debe usar un correo @gmail.com'
+  if (tipo) return 'Debe usar un correo @escuelaing.edu.co o @mail.escuelaing.edu.co'
+  return ''
 }
 
 const emptyErrors = (): FormErrors => ({
   nombre: '',
   apellido: '',
+  tipoUsuario: '',
   correo: '',
   contrasena: '',
 })
@@ -21,6 +37,7 @@ const emptyErrors = (): FormErrors => ({
 function validate(
   nombre: string,
   apellido: string,
+  tipoUsuario: string,
   correo: string,
   contrasena: string
 ): FormErrors {
@@ -39,10 +56,23 @@ function validate(
     errors.apellido = 'El apellido solo puede contener letras y espacios.'
   }
 
+  if (!tipoUsuario) {
+    errors.tipoUsuario = 'Por favor selecciona tu tipo de usuario.'
+  }
+
   if (!correo.trim()) {
     errors.correo = 'El correo es obligatorio.'
   } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo.trim())) {
     errors.correo = 'Ingrese un correo electrónico válido.'
+  } else if (tipoUsuario === 'FAMILIAR' && !correo.endsWith('@gmail.com')) {
+    errors.correo = 'Los familiares deben usar un correo @gmail.com.'
+  } else if (
+    tipoUsuario &&
+    tipoUsuario !== 'FAMILIAR' &&
+    !correo.endsWith('@escuelaing.edu.co') &&
+    !correo.endsWith('@mail.escuelaing.edu.co')
+  ) {
+    errors.correo = 'Debe usar un correo @escuelaing.edu.co o @mail.escuelaing.edu.co.'
   }
 
   if (!contrasena) {
@@ -65,6 +95,7 @@ function hasErrors(errors: FormErrors): boolean {
 export default function RegisterPage() {
   const [nombre, setNombre] = useState<string>('')
   const [apellido, setApellido] = useState<string>('')
+  const [tipoUsuario, setTipoUsuario] = useState<string>('')
   const [correo, setCorreo] = useState<string>('')
   const [contrasena, setContrasena] = useState<string>('')
   const [errores, setErrores] = useState<FormErrors>(emptyErrors())
@@ -76,9 +107,9 @@ export default function RegisterPage() {
 
   useEffect(() => {
     if (submitted) {
-      setErrores(validate(nombre, apellido, correo, contrasena))
+      setErrores(validate(nombre, apellido, tipoUsuario, correo, contrasena))
     }
-  }, [nombre, apellido, correo, contrasena, submitted])
+  }, [nombre, apellido, tipoUsuario, correo, contrasena, submitted])
 
   const isDisabled = submitted && hasErrors(errores)
 
@@ -86,7 +117,7 @@ export default function RegisterPage() {
     e.preventDefault()
     setSubmitted(true)
 
-    const current = validate(nombre, apellido, correo, contrasena)
+    const current = validate(nombre, apellido, tipoUsuario, correo, contrasena)
     setErrores(current)
     if (hasErrors(current)) return
 
@@ -94,11 +125,11 @@ export default function RegisterPage() {
     setErrorGeneral('')
 
     try {
-      await apiClient.post('/api/users/players', {
+      await apiClient.post('/api/access/register', {
         nombre: nombre.trim() + ' ' + apellido.trim(),
         email: correo,
         password: contrasena,
-        tipoUsuario: 'ESTUDIANTE',
+        tipoUsuario,
       })
       navigate('/login')
     } catch (error: unknown) {
@@ -117,6 +148,7 @@ export default function RegisterPage() {
     padding: '0.5rem',
     width: '100%',
     boxSizing: 'border-box' as const,
+    fontFamily: 'Montserrat, sans-serif',
   })
 
   const labelStyle = {
@@ -188,13 +220,44 @@ export default function RegisterPage() {
           {errores.apellido && <p style={errorTextStyle}>{errores.apellido}</p>}
           {!errores.apellido && <div style={{ marginBottom: '1rem' }} />}
 
+          <label htmlFor="tipoUsuario" style={labelStyle}>
+            Tipo de Usuario
+          </label>
+          <select
+            id="tipoUsuario"
+            value={tipoUsuario}
+            onChange={(e: ChangeEvent<HTMLSelectElement>) => setTipoUsuario(e.target.value)}
+            style={inputStyle('tipoUsuario')}
+          >
+            <option value="">Selecciona tu tipo de usuario</option>
+            {TIPOS_USUARIO.map(t => (
+              <option key={t.value} value={t.value}>
+                {t.label}
+              </option>
+            ))}
+          </select>
+          {errores.tipoUsuario && <p style={errorTextStyle}>{errores.tipoUsuario}</p>}
+          {!errores.tipoUsuario && tipoUsuario && (
+            <p
+              style={{
+                fontSize: '0.75rem',
+                color: '#737373',
+                margin: '0.25rem 0 1rem 0',
+                fontFamily: 'Montserrat, sans-serif',
+              }}
+            >
+              {getDominioHint(tipoUsuario)}
+            </p>
+          )}
+          {!errores.tipoUsuario && !tipoUsuario && <div style={{ marginBottom: '1rem' }} />}
+
           <label htmlFor="correo" style={labelStyle}>
-            Correo electrónico
+            Correo Institucional
           </label>
           <input
             id="correo"
             type="email"
-            placeholder="Ingrese su correo electrónico"
+            placeholder="Ingrese su correo institucional"
             value={correo}
             onChange={(e: ChangeEvent<HTMLInputElement>) => setCorreo(e.target.value)}
             style={inputStyle('correo')}
@@ -228,6 +291,7 @@ export default function RegisterPage() {
               borderRadius: '4px',
               fontSize: '1rem',
               cursor: isDisabled || isLoading ? 'not-allowed' : 'pointer',
+              fontFamily: 'Montserrat, sans-serif',
             }}
           >
             {isLoading ? 'Creando cuenta...' : 'Crear Cuenta'}
