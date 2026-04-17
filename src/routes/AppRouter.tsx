@@ -129,7 +129,15 @@ const AppRouter = () => {
         <Route
           element={
             <PrivateRoute roles={['ADMINISTRADOR']}>
-              <DashboardLayout>
+              <DashboardLayout
+                roleLabel="Administrador"
+                navLinks={[
+                  { label: 'Inicio', to: '/' },
+                  { label: 'Torneos', to: '/torneos' },
+                  { label: 'Equipos', to: '/equipos' },
+                  { label: 'Configuracion', to: '/configuracion' },
+                ]}
+              >
                 <Outlet />
               </DashboardLayout>
             </PrivateRoute>
