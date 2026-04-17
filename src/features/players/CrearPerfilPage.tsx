@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import apiClient from '../../services/apiClient'
-import { obtenerJugadorPorCorreo } from '../../services/jugadorService'
 import useAuthStore from '../../store/authStore'
 
 const POSICIONES = [
@@ -181,20 +180,6 @@ const CamisetaIcon = ({ numero, color = '#11823B' }: { numero: string; color?: s
 const CrearPerfilPage = () => {
   const navigate = useNavigate()
   const user = useAuthStore(state => state.user)
-  const logout = useAuthStore(state => state.logout)
-
-  const handleToggleCapitan = async () => {
-    try {
-      await apiClient.patch(`/api/users/players/${user?.correo}/profile/toggle-role`)
-      alert(
-        '✅ Rol actualizado. Por favor cierra sesión e inicia sesión nuevamente para ver los cambios.'
-      )
-      logout()
-      navigate('/login')
-    } catch {
-      alert('❌ Error al cambiar el rol')
-    }
-  }
 
   const [nombre, setNombre] = useState('')
   const [semestre, setSemestre] = useState('')
@@ -204,7 +189,7 @@ const CrearPerfilPage = () => {
   const [dorsal, setDorsal] = useState('')
   const [posicionPrincipal, setPosicionPrincipal] = useState('')
   const [posicionSecundaria, setPosicionSecundaria] = useState('')
-  const [esCapitan] = useState(false)
+  const [esCapitan, setEsCapitan] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
   const [errores, setErrores] = useState<FormErrors>({})
@@ -238,18 +223,11 @@ const CrearPerfilPage = () => {
     setErrores({})
 
     try {
-      const jugador = await obtenerJugadorPorCorreo(user.correo)
-      if (!jugador) {
-        setErrores({ general: 'No se encontró el jugador asociado a tu cuenta' })
-        setLoading(false)
-        return
-      }
-
       const posiciones = posicionSecundaria
         ? [posicionPrincipal, posicionSecundaria]
         : [posicionPrincipal]
 
-      await apiClient.post(`/api/users/players/${jugador.id}/profile`, {
+      await apiClient.post(`/api/users/players/${user.correo}/profile`, {
         posiciones,
         dorsal: Number(dorsal),
         foto: '',
@@ -766,7 +744,7 @@ const CrearPerfilPage = () => {
                 No
               </span>
               <div
-                onClick={handleToggleCapitan}
+                onClick={() => setEsCapitan(!esCapitan)}
                 style={{
                   width: '48px',
                   height: '26px',
@@ -815,6 +793,8 @@ const CrearPerfilPage = () => {
                 ✓ YA ERES CAPITÁN
               </p>
             )}
+
+            {/* TODO: conectar al endpoint cuando back implemente cambio de rol */}
           </div>
 
           {/* Error general */}
