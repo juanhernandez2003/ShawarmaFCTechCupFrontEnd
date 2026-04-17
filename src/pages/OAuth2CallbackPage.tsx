@@ -6,6 +6,7 @@ import useAuthStore from '../store/authStore'
 const getRutaPorRol = (rol: string): string => {
   switch (rol) {
     case 'ADMINISTRADOR':
+      return '/admin'
     case 'ORGANIZADOR':
       return '/organizador'
     case 'CAPITAN':

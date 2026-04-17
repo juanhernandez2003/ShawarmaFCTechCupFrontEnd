@@ -2,6 +2,7 @@ import { useState, type FormEvent, type ChangeEvent, type CSSProperties } from '
 import { Link, useNavigate } from 'react-router-dom'
 import PageHeader from '../components/common/PageHeader'
 import { login, decodeToken } from '../services/authService'
+import apiClient from '../services/apiClient'
 import useAuthStore from '../store/authStore'
 
 interface FormErrors {
@@ -29,6 +30,7 @@ const labelStyle: CSSProperties = {
 const getRutaPorRol = (rol: string): string => {
   switch (rol) {
     case 'ADMINISTRADOR':
+      return '/admin'
     case 'ORGANIZADOR':
       return '/organizador'
     case 'CAPITAN':
@@ -75,6 +77,7 @@ export default function LoginPage() {
     setErrorGeneral('')
 
     try {
+      // Intento primero como usuario normal
       const response = await login({ email: correo, password: contrasena })
       const decoded = decodeToken(response.token)
       authStore.login(response.token, {
@@ -82,12 +85,28 @@ export default function LoginPage() {
         rol: decoded.rol,
       })
       navigate(getRutaPorRol(decoded.rol))
-    } catch (error: unknown) {
-      const axiosError = error as { response?: { data?: { detalle?: string } } }
-      if (axiosError.response?.data?.detalle) {
-        setErrorGeneral(axiosError.response.data.detalle)
-      } else {
-        setErrorGeneral('Error de conexión con el servidor.')
+    } catch {
+      // Si falla, intento como administrador
+      try {
+        const adminResponse = await apiClient.post<{
+          token: string
+          administradorId?: string
+        }>('/api/admin/login', { email: correo, password: contrasena })
+
+        const decoded = decodeToken(adminResponse.data.token)
+        authStore.login(adminResponse.data.token, {
+          id: adminResponse.data.administradorId,
+          correo: decoded.sub,
+          rol: decoded.rol,
+        })
+        navigate(getRutaPorRol(decoded.rol))
+      } catch (adminError: unknown) {
+        const axiosError = adminError as { response?: { data?: { detalle?: string } } }
+        if (axiosError.response?.data?.detalle) {
+          setErrorGeneral(axiosError.response.data.detalle)
+        } else {
+          setErrorGeneral('Correo o contraseña incorrectos.')
+        }
       }
     } finally {
       setIsLoading(false)
