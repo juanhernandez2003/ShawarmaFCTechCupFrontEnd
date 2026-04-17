@@ -111,7 +111,6 @@ const TorneosPage = () => {
                     Tabla
                   </button>
                   <button
-                    onClick={() => navigate(`/torneos/${torneo.id}/llaves`)}
                     style={{
                       backgroundColor: '#000000',
                       color: 'white',
@@ -125,7 +124,6 @@ const TorneosPage = () => {
                     Llaves
                   </button>
                   <button
-                    onClick={() => navigate(`/torneos/${torneo.id}/estadisticas`)}
                     style={{
                       backgroundColor: '#000000',
                       color: 'white',
