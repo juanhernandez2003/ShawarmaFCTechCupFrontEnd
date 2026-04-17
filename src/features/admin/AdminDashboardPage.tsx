@@ -208,32 +208,41 @@ const AdminDashboardPage = () => {
           </div>
         </div>
 
-        {/* Botones de acción */}
-        <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+        {/* Botones de acción — equidistantes */}
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            marginBottom: '1.5rem',
+            gap: '1rem',
+          }}
+        >
           {[
             {
               label: '⊕ Registrar organizador',
               onClick: () => navigate('/admin/registrar/organizador'),
             },
             { label: '📋 Registrar Árbitro', onClick: () => navigate('/admin/registrar/arbitro') },
-            { label: '📂 Gestionar Usuarios', onClick: () => navigate('/admin/usuarios') },
             { label: '🧾 Ver Auditoría', onClick: () => navigate('/admin/auditoria') },
           ].map(btn => (
             <button
               key={btn.label}
               onClick={btn.onClick}
               style={{
+                flex: 1,
                 backgroundColor: '#11823B',
                 color: '#ffffff',
                 border: 'none',
                 borderRadius: '4px',
-                padding: '0.6rem 1.25rem',
+                padding: '0.6rem 1rem',
                 cursor: 'pointer',
                 fontSize: '0.85rem',
                 fontFamily: 'Montserrat, sans-serif',
                 display: 'flex',
                 alignItems: 'center',
+                justifyContent: 'center',
                 gap: '0.4rem',
+                whiteSpace: 'nowrap',
               }}
             >
               {btn.label}

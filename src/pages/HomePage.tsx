@@ -30,59 +30,6 @@ const HomePage = () => {
             backgroundPosition: 'center',
           }}
         />
-
-        {/* Líneas de cancha decorativas */}
-        <div
-          style={{
-            position: 'absolute',
-            bottom: 0,
-            left: '50%',
-            transform: 'translateX(-50%)',
-            width: '600px',
-            height: '200px',
-            border: '2px solid rgba(255,255,255,0.08)',
-            borderBottom: 'none',
-            borderRadius: '300px 300px 0 0',
-          }}
-        />
-        <div
-          style={{
-            position: 'absolute',
-            bottom: 0,
-            left: '50%',
-            transform: 'translateX(-50%)',
-            width: '2px',
-            height: '100%',
-            backgroundColor: 'rgba(255,255,255,0.05)',
-          }}
-        />
-        <div
-          style={{
-            position: 'absolute',
-            bottom: '20px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            width: '80px',
-            height: '80px',
-            border: '2px solid rgba(255,255,255,0.08)',
-            borderRadius: '50%',
-          }}
-        />
-
-        {/* Pelota */}
-        <div
-          style={{
-            position: 'absolute',
-            bottom: '30px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            fontSize: '2.5rem',
-            opacity: 0.6,
-          }}
-        >
-          ⚽
-        </div>
-
         {/* Contenido hero */}
         <div style={{ position: 'relative', zIndex: 1, padding: '4rem 3rem', maxWidth: '600px' }}>
           <h1
