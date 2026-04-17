@@ -30,6 +30,14 @@ import OrganizerDashboardPage from '../features/organizer/OrganizerDashboardPage
 import OrganizerCreateTournamentPage from '../features/organizer/OrganizerCreateTournamentPage'
 import OrganizerTournamentManagePage from '../features/organizer/OrganizerTournamentManagePage'
 import OAuth2CallbackPage from '../pages/OAuth2CallbackPage'
+import JugadorDashboardPage from '../features/players/JugadorDashboardPage'
+import SolicitudesPage from '../features/players/SolicitudesPage'
+import SancionesPage from '../features/players/SancionesPage'
+import CapitanDashboardPage from '../features/captain/CapitanDashboardPage'
+import AlineacionPage from '../features/captain/AlineacionPage'
+import AlineacionRivalPage from '../features/captain/AlineacionRivalPage'
+import BuscarJugadoresPage from '../features/captain/BuscarJugadoresPage'
+import PagosPage from '../features/captain/PagosPage'
 
 const AppRouter = () => {
   return (
@@ -66,7 +74,7 @@ const AppRouter = () => {
         <Route path="/registro" element={<RegisterPage />} />
         <Route path="/oauth2/callback" element={<OAuth2CallbackPage />} />
 
-        {/* Rutas protegidas */}
+        {/* Rutas protegidas — JUGADOR y CAPITAN */}
         <Route
           element={
             <PrivateRoute>
@@ -128,6 +136,26 @@ const AppRouter = () => {
               </RoleRoute>
             }
           />
+        </Route>
+
+        {/* Rutas protegidas — CAPITAN */}
+        <Route
+          element={
+            <PrivateRoute roles={['CAPITAN']}>
+              <DashboardLayout>
+                <Outlet />
+              </DashboardLayout>
+            </PrivateRoute>
+          }
+        >
+          <Route path="/capitan/dashboard" element={<CapitanDashboardPage />} />
+          <Route path="/capitan/alineacion" element={<AlineacionPage />} />
+          <Route path="/capitan/alineacion-rival" element={<AlineacionRivalPage />} />
+          <Route path="/capitan/jugadores" element={<BuscarJugadoresPage />} />
+          <Route path="/capitan/pagos" element={<PagosPage />} />
+          <Route path="/capitan/equipos" element={<TeamListPage />} />
+          <Route path="/capitan/equipos/:id" element={<TeamDetailPage />} />
+          <Route path="/capitan/equipos/registro" element={<TeamRegisterPage />} />
         </Route>
 
         {/* Ruta no encontrada */}
