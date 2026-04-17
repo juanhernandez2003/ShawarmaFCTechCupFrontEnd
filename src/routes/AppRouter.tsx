@@ -116,7 +116,14 @@ const AppRouter = () => {
           <Route path="/equipos" element={<TeamListPage />} />
           <Route path="/equipos/:id" element={<TeamDetailPage />} />
           <Route path="/equipos/registro" element={<TeamRegisterPage />} />
-          <Route path="/perfil" element={<NotFoundPage />} />
+          <Route
+            path="/perfil"
+            element={
+              <RoleRoute roles={['JUGADOR', 'CAPITAN', 'USUARIO_REGISTRADO']}>
+                <CrearPerfilPage />
+              </RoleRoute>
+            }
+          />
 
           <Route
             path="/dashboard"
@@ -145,7 +152,7 @@ const AppRouter = () => {
           <Route
             path="/perfil/crear"
             element={
-              <RoleRoute roles={['JUGADOR', 'CAPITAN']}>
+              <RoleRoute roles={['JUGADOR', 'CAPITAN', 'USUARIO_REGISTRADO']}>
                 <CrearPerfilPage />
               </RoleRoute>
             }

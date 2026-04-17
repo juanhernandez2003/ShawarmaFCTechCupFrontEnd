@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import apiClient from '../../services/apiClient'
+import { obtenerJugadorPorCorreo } from '../../services/jugadorService'
 import useAuthStore from '../../store/authStore'
 
 const POSICIONES = [
@@ -223,11 +224,18 @@ const CrearPerfilPage = () => {
     setErrores({})
 
     try {
+      const jugador = await obtenerJugadorPorCorreo(user.correo)
+      if (!jugador) {
+        setErrores({ general: 'No se encontró el jugador asociado a tu cuenta' })
+        setLoading(false)
+        return
+      }
+
       const posiciones = posicionSecundaria
         ? [posicionPrincipal, posicionSecundaria]
         : [posicionPrincipal]
 
-      await apiClient.post(`/api/users/players/${user.correo}/profile`, {
+      await apiClient.post(`/api/users/players/${jugador.id}/profile`, {
         posiciones,
         dorsal: Number(dorsal),
         foto: '',

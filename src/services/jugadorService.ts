@@ -54,3 +54,9 @@ export async function rechazarInvitacion(id: string): Promise<Invitacion> {
   const response = await apiClient.patch(`/api/invitations/${id}/reject`)
   return response.data
 }
+
+export async function obtenerJugadorPorCorreo(correo: string): Promise<Jugador | null> {
+  const response = await apiClient.get('/api/users/players')
+  const jugadores: Jugador[] = response.data
+  return jugadores.find(j => j.email === correo) ?? null
+}
