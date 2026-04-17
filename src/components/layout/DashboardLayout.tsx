@@ -2,6 +2,7 @@ import { useState, type ReactNode } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import useAuthStore from '../../store/authStore'
 import Footer from './Footer'
+import logo from '../../assets/logo.png'
 
 interface DashboardLayoutProps {
   children: ReactNode
@@ -54,7 +55,7 @@ const DashboardLayout = ({
           height: '64px',
         }}
       >
-        <span style={{ fontWeight: 'bold', color: '#11823B', fontSize: '1.1rem' }}>TECHCUP</span>
+        <img src={logo} alt="TechCup" style={{ height: '100px', objectFit: 'contain' }} />
 
         <nav style={{ display: 'flex', gap: '2rem' }}>
           {navLinks.map(link => (
