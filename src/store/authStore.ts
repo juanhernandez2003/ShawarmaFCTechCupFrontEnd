@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 
 interface User {
+  id?: string
   correo: string
   rol: string
 }
@@ -23,7 +24,7 @@ const readStoredUser = (): User | null => {
       localStorage.removeItem('user')
       return null
     }
-    return { correo: parsed.correo, rol: parsed.rol }
+    return { id: parsed.id, correo: parsed.correo, rol: parsed.rol }
   } catch {
     localStorage.removeItem('user')
     return null

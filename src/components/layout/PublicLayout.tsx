@@ -21,6 +21,24 @@ const getInitials = (nombre: string): string => {
   return (parts[0][0] + parts[1][0]).toUpperCase()
 }
 
+const getPanelPorRol = (rol: string): string => {
+  switch (rol) {
+    case 'ADMINISTRADOR':
+      return '/admin'
+    case 'ORGANIZADOR':
+      return '/organizador'
+    case 'ARBITRO':
+      return '/arbitro'
+    case 'CAPITAN':
+      return '/capitan/dashboard'
+    case 'JUGADOR':
+    case 'FAMILIAR':
+      return '/equipos'
+    default:
+      return '/dashboard'
+  }
+}
+
 const PublicLayout = ({ children }: PublicLayoutProps) => {
   const navigate = useNavigate()
   const [hoveredLink, setHoveredLink] = useState<string | null>(null)
@@ -103,6 +121,21 @@ const PublicLayout = ({ children }: PublicLayoutProps) => {
               {rol}
             </span>
             <button
+              onClick={() => navigate(getPanelPorRol(rol))}
+              style={{
+                backgroundColor: 'transparent',
+                color: '#11823B',
+                border: '1px solid #11823B',
+                borderRadius: '4px',
+                padding: '0.35rem 0.85rem',
+                fontSize: '0.85rem',
+                cursor: 'pointer',
+                fontFamily: 'Montserrat, sans-serif',
+              }}
+            >
+              Panel de Control
+            </button>
+            <button
               onClick={handleLogout}
               style={{
                 backgroundColor: '#11823B',
@@ -112,7 +145,6 @@ const PublicLayout = ({ children }: PublicLayoutProps) => {
                 padding: '0.35rem 0.85rem',
                 fontSize: '0.85rem',
                 cursor: 'pointer',
-                marginLeft: '0.5rem',
                 fontFamily: 'Montserrat, sans-serif',
               }}
             >
