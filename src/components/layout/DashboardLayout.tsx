@@ -2,19 +2,16 @@ import { useState, type ReactNode } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import useAuthStore from '../../store/authStore'
 import Footer from './Footer'
-import logo from '../../assets/logo.png'
 
 interface DashboardLayoutProps {
   children: ReactNode
-  navLinks?: Array<{ label: string; to: string }>
-  roleLabel?: string
 }
 
-const defaultNavLinks = [
+const navLinks = [
   { label: 'Inicio', to: '/dashboard' },
   { label: 'Torneos', to: '/torneos' },
   { label: 'Equipos', to: '/equipos' },
-  { label: 'Configuracion', to: '/configuracion' },
+  { label: 'Configuración', to: '/configuracion' },
 ]
 
 const getInitials = (nombre: string): string => {
@@ -23,11 +20,7 @@ const getInitials = (nombre: string): string => {
   return (parts[0][0] + parts[1][0]).toUpperCase()
 }
 
-const DashboardLayout = ({
-  children,
-  navLinks = defaultNavLinks,
-  roleLabel,
-}: DashboardLayoutProps) => {
+const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const user = useAuthStore(state => state.user)
   const [hoveredLink, setHoveredLink] = useState<string | null>(null)
   const navigate = useNavigate()
@@ -38,7 +31,7 @@ const DashboardLayout = ({
   }
 
   const initials = user ? getInitials(user.correo) : '?'
-  const rol = roleLabel ?? (user ? user.rol : 'Invitado')
+  const rol = user ? user.rol : 'Invitado'
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
@@ -55,7 +48,7 @@ const DashboardLayout = ({
           height: '64px',
         }}
       >
-        <img src={logo} alt="TechCup" style={{ height: '100px', objectFit: 'contain' }} />
+        <span style={{ fontWeight: 'bold', color: '#11823B', fontSize: '1.1rem' }}>⚽ TECHCUP</span>
 
         <nav style={{ display: 'flex', gap: '2rem' }}>
           {navLinks.map(link => (
@@ -119,7 +112,7 @@ const DashboardLayout = ({
               fontFamily: 'Montserrat, sans-serif',
             }}
           >
-            Cerrar sesion
+            Cerrar sesión
           </button>
         </div>
       </header>

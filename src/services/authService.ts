@@ -16,15 +16,9 @@ export interface DecodedToken {
   exp: number
 }
 
-const decodeBase64Url = (value: string): string => {
-  const normalized = value.replace(/-/g, '+').replace(/_/g, '/')
-  const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '=')
-  return atob(padded)
-}
-
 export const decodeToken = (token: string): DecodedToken => {
   const payload = token.split('.')[1]
-  return JSON.parse(decodeBase64Url(payload)) as DecodedToken
+  return JSON.parse(atob(payload)) as DecodedToken
 }
 
 export const login = async (data: LoginRequest): Promise<LoginResponse> => {

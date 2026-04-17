@@ -1,7 +1,6 @@
 import { type ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Footer from './Footer'
-import logo from '../../assets/logo.png'
 
 interface AuthLayoutProps {
   children: ReactNode
@@ -25,7 +24,7 @@ const AuthLayout = ({ children }: AuthLayoutProps) => {
           height: '64px',
         }}
       >
-        <img src={logo} alt="TechCup" style={{ height: '100px', objectFit: 'contain' }} />
+        <span style={{ fontWeight: 'bold', color: '#11823B', fontSize: '1.1rem' }}>⚽ TECHCUP</span>
 
         <button
           onClick={() => navigate(-1)}

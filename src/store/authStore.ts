@@ -13,37 +13,21 @@ interface AuthState {
   isAuthenticated: () => boolean
 }
 
-const readStoredUser = (): User | null => {
-  const rawUser = localStorage.getItem('user')
-  if (!rawUser) return null
-
+const decodeUserFromToken = (token: string): User | null => {
   try {
-    const parsed = JSON.parse(rawUser) as Partial<User>
-    if (typeof parsed?.correo !== 'string' || typeof parsed?.rol !== 'string') {
-      localStorage.removeItem('user')
-      return null
-    }
-    return { correo: parsed.correo, rol: parsed.rol }
+    const payload = token.split('.')[1]
+    const decoded = JSON.parse(atob(payload)) as { sub: string; rol: string }
+    return { correo: decoded.sub, rol: decoded.rol }
   } catch {
-    localStorage.removeItem('user')
     return null
   }
 }
 
-const readStoredToken = (): string | null => {
-  const rawToken = localStorage.getItem('token')
-  if (!rawToken) return null
-  const normalizedToken = rawToken.trim()
-  if (!normalizedToken) {
-    localStorage.removeItem('token')
-    return null
-  }
-  return normalizedToken
-}
+const storedToken = localStorage.getItem('token') || null
 
-const useAuthStore = create<AuthState>((set, get) => ({
-  token: readStoredToken(),
-  user: readStoredUser(),
+const useAuthStore = create<AuthState>(set => ({
+  token: storedToken,
+  user: storedToken ? decodeUserFromToken(storedToken) : null,
 
   login: (token, user) => {
     localStorage.setItem('token', token)
@@ -56,7 +40,7 @@ const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   isAuthenticated: () => {
-    return get().token !== null
+    return localStorage.getItem('token') !== null
   },
 }))
 
