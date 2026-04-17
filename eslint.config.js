@@ -60,10 +60,7 @@ export default defineConfig([
       ...tsPlugin.configs.recommended.rules,
       ...prettierConfig.rules,
       'no-unused-vars': 'off',
-      '@typescript-eslint/no-unused-vars': [
-        'error',
-        { varsIgnorePattern: '^[A-Z_]', argsIgnorePattern: '^_' },
-      ],
+      '@typescript-eslint/no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
       'prettier/prettier': 'error',
     },
   },

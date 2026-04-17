@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { obtenerEquipo, Equipo } from '../../services/teamService'
-import apiClient from '../../services/apiClient'
 
 const TeamDetailPage = () => {
   const { id } = useParams<{ id: string }>()
@@ -10,38 +9,13 @@ const TeamDetailPage = () => {
   const [error, setError] = useState<string | null>(null)
   const navigate = useNavigate()
 
-  const [nombre, setNombre] = useState('')
-  const [colorPrincipal, setColorPrincipal] = useState('')
-  const [colorSecundario, setColorSecundario] = useState('')
-  const [guardando, setGuardando] = useState(false)
-  const [mensajeGuardado, setMensajeGuardado] = useState('')
-
   useEffect(() => {
     if (!id) return
     obtenerEquipo(id)
-      .then(data => {
-        setEquipo(data)
-        setNombre(data.nombre)
-        setColorPrincipal(data.colorPrincipal)
-        setColorSecundario(data.colorSecundario)
-      })
+      .then(data => setEquipo(data))
       .catch(() => setError('Equipo no encontrado'))
       .finally(() => setLoading(false))
   }, [id])
-
-  const handleGuardar = async () => {
-    if (!id) return
-    setGuardando(true)
-    setMensajeGuardado('')
-    try {
-      await apiClient.put(`/api/teams/${id}`, { nombre, colorPrincipal, colorSecundario })
-      setMensajeGuardado('✅ Equipo actualizado correctamente')
-    } catch {
-      setMensajeGuardado('❌ Error al actualizar el equipo')
-    } finally {
-      setGuardando(false)
-    }
-  }
 
   if (loading)
     return (
@@ -124,8 +98,8 @@ const TeamDetailPage = () => {
             </label>
             <input
               type="text"
-              value={nombre}
-              onChange={e => setNombre(e.target.value)}
+              value={equipo.nombre}
+              readOnly
               style={{
                 width: '100%',
                 boxSizing: 'border-box',
@@ -133,7 +107,7 @@ const TeamDetailPage = () => {
                 border: '1px solid #D9D9D9',
                 borderRadius: '4px',
                 fontSize: '0.85rem',
-                backgroundColor: '#ffffff',
+                backgroundColor: '#f9f9f9',
               }}
             />
           </div>
@@ -157,8 +131,8 @@ const TeamDetailPage = () => {
                 </p>
                 <input
                   type="text"
-                  value={colorPrincipal}
-                  onChange={e => setColorPrincipal(e.target.value)}
+                  value={equipo.colorPrincipal || '-'}
+                  readOnly
                   style={{
                     width: '100%',
                     boxSizing: 'border-box',
@@ -166,7 +140,6 @@ const TeamDetailPage = () => {
                     border: '1px solid #D9D9D9',
                     borderRadius: '4px',
                     fontSize: '0.8rem',
-                    backgroundColor: '#ffffff',
                   }}
                 />
               </div>
@@ -176,8 +149,8 @@ const TeamDetailPage = () => {
                 </p>
                 <input
                   type="text"
-                  value={colorSecundario}
-                  onChange={e => setColorSecundario(e.target.value)}
+                  value={equipo.colorSecundario || '-'}
+                  readOnly
                   style={{
                     width: '100%',
                     boxSizing: 'border-box',
@@ -185,7 +158,6 @@ const TeamDetailPage = () => {
                     border: '1px solid #D9D9D9',
                     borderRadius: '4px',
                     fontSize: '0.8rem',
-                    backgroundColor: '#ffffff',
                   }}
                 />
               </div>
@@ -217,35 +189,20 @@ const TeamDetailPage = () => {
           </div>
 
           <button
-            onClick={handleGuardar}
-            disabled={guardando}
             style={{
               width: '100%',
               padding: '0.75rem',
-              backgroundColor: guardando ? '#737373' : '#11823B',
+              backgroundColor: '#11823B',
               color: '#ffffff',
               border: 'none',
               borderRadius: '4px',
-              cursor: guardando ? 'not-allowed' : 'pointer',
+              cursor: 'pointer',
               fontSize: '0.9rem',
               marginBottom: '0.5rem',
             }}
           >
-            {guardando ? 'Guardando...' : '💾 Guardar Cambios'}
+            💾 Guardar Cambios
           </button>
-
-          {mensajeGuardado && (
-            <p
-              style={{
-                fontSize: '0.85rem',
-                textAlign: 'center',
-                margin: '0.25rem 0 0.5rem',
-                color: mensajeGuardado.includes('✅') ? '#11823B' : '#E53E3E',
-              }}
-            >
-              {mensajeGuardado}
-            </p>
-          )}
 
           <button
             onClick={() => navigate('/equipos')}
