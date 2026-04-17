@@ -40,7 +40,7 @@ const AdminDashboardPage = () => {
 
   const usuarios: Usuario[] = [...organizadores, ...arbitros]
 
-  const badgeStyle = (rol: string) => ({
+  const badgeStyle = (_rol: string) => ({
     backgroundColor: 'transparent',
     color: '#11823B',
     border: '1px solid #11823B',

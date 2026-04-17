@@ -337,4 +337,4 @@ const HomePage = () => {
   )
 }
 
-export default <HomePage></HomePage>
+export default HomePage

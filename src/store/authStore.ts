@@ -16,7 +16,6 @@ interface AuthState {
 const readStoredUser = (): User | null => {
   const rawUser = localStorage.getItem('user')
   if (!rawUser) return null
-
   try {
     const parsed = JSON.parse(rawUser) as Partial<User>
     if (typeof parsed?.correo !== 'string' || typeof parsed?.rol !== 'string') {
@@ -44,19 +43,14 @@ const readStoredToken = (): string | null => {
 const useAuthStore = create<AuthState>((set, get) => ({
   token: readStoredToken(),
   user: readStoredUser(),
-
   login: (token, user) => {
     localStorage.setItem('token', token)
-    localStorage.setItem('user', JSON.stringify(user))
     set({ token, user })
   },
-
   logout: () => {
     localStorage.removeItem('token')
-    localStorage.removeItem('user')
     set({ token: null, user: null })
   },
-
   isAuthenticated: () => {
     return get().token !== null
   },

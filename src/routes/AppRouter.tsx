@@ -30,6 +30,14 @@ import OrganizerDashboardPage from '../features/organizer/OrganizerDashboardPage
 import OrganizerCreateTournamentPage from '../features/organizer/OrganizerCreateTournamentPage'
 import OrganizerTournamentManagePage from '../features/organizer/OrganizerTournamentManagePage'
 import OAuth2CallbackPage from '../pages/OAuth2CallbackPage'
+import JugadorDashboardPage from '../features/players/JugadorDashboardPage'
+import SolicitudesPage from '../features/players/SolicitudesPage'
+import SancionesPage from '../features/players/SancionesPage'
+import CapitanDashboardPage from '../features/captain/CapitanDashboardPage'
+import AlineacionPage from '../features/captain/AlineacionPage'
+import AlineacionRivalPage from '../features/captain/AlineacionRivalPage'
+import BuscarJugadoresPage from '../features/captain/BuscarJugadoresPage'
+import PagosPage from '../features/captain/PagosPage'
 
 const AppRouter = () => {
   return (
@@ -101,7 +109,6 @@ const AppRouter = () => {
             </PrivateRoute>
           }
         >
-          <Route path="/dashboard" element={<Navigate to="/organizador" replace />} />
           <Route path="/organizador" element={<OrganizerDashboardPage />} />
           <Route path="/organizador/torneos/crear" element={<OrganizerCreateTournamentPage />} />
           <Route path="/organizador/torneos/:id" element={<OrganizerTournamentManagePage />} />
@@ -111,6 +118,30 @@ const AppRouter = () => {
           <Route path="/equipos/registro" element={<TeamRegisterPage />} />
           <Route path="/perfil" element={<NotFoundPage />} />
 
+          <Route
+            path="/dashboard"
+            element={
+              <RoleRoute roles={['JUGADOR']}>
+                <JugadorDashboardPage />
+              </RoleRoute>
+            }
+          />
+          <Route
+            path="/solicitudes"
+            element={
+              <RoleRoute roles={['JUGADOR']}>
+                <SolicitudesPage />
+              </RoleRoute>
+            }
+          />
+          <Route
+            path="/sanciones"
+            element={
+              <RoleRoute roles={['JUGADOR']}>
+                <SancionesPage />
+              </RoleRoute>
+            }
+          />
           <Route
             path="/perfil/crear"
             element={
@@ -128,6 +159,28 @@ const AppRouter = () => {
               </RoleRoute>
             }
           />
+        </Route>
+
+        {/* Rutas protegidas — CAPITAN */}
+        <Route
+          element={
+            <PrivateRoute>
+              <RoleRoute roles={['CAPITAN']}>
+                <DashboardLayout>
+                  <Outlet />
+                </DashboardLayout>
+              </RoleRoute>
+            </PrivateRoute>
+          }
+        >
+          <Route path="/capitan/dashboard" element={<CapitanDashboardPage />} />
+          <Route path="/capitan/alineacion" element={<AlineacionPage />} />
+          <Route path="/capitan/alineacion-rival" element={<AlineacionRivalPage />} />
+          <Route path="/capitan/jugadores" element={<BuscarJugadoresPage />} />
+          <Route path="/capitan/pagos" element={<PagosPage />} />
+          <Route path="/capitan/equipos" element={<TeamListPage />} />
+          <Route path="/capitan/equipos/:id" element={<TeamDetailPage />} />
+          <Route path="/capitan/equipos/registro" element={<TeamRegisterPage />} />
         </Route>
 
         {/* Ruta no encontrada */}
