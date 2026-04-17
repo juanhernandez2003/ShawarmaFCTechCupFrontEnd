@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import apiClient from '../../services/apiClient'
 import useAuthStore from '../../store/authStore'
@@ -16,7 +16,7 @@ const COLORES = [
   '#ef4444',
 ]
 
-const SEMESTRES = ['2026-1', '2026-2', '2027-1', '2027-2', '2028-1', '2028-2']
+const SEMESTRES = ['1', '2', '3', '4', '5', '6', '7', '8', '9']
 
 const TeamRegisterPage = () => {
   const [nombre, setNombre] = useState('')
@@ -26,40 +26,25 @@ const TeamRegisterPage = () => {
   const [equipoCreado, setEquipoCreado] = useState<{ id: string; nombre: string } | null>(null)
   const [loading, setLoading] = useState(false)
   const [errores, setErrores] = useState<Record<string, string>>({})
-  const [escudoArchivo, setEscudoArchivo] = useState<File | null>(null)
-  const [submitted, setSubmitted] = useState(false)
-  const [showPopup, setShowPopup] = useState(false)
-  const [popupMensaje, setPopupMensaje] = useState('')
-  const escudoInputRef = useRef<HTMLInputElement>(null)
   const navigate = useNavigate()
   const user = useAuthStore(state => state.user)
 
   const validar = () => {
     const e: Record<string, string> = {}
-    if (!nombre.trim() || nombre.trim().length < 3)
-      e.nombre = 'Por favor ingrese un nombre de equipo válido (mínimo 3 caracteres)'
+    if (!nombre.trim()) e.nombre = 'Por favor ingrese un nombre de equipo válido'
     if (!colorPrincipal) e.colorPrincipal = 'Por favor seleccione un color principal'
-    else if (colorPrincipal === colorSecundario)
-      e.colorPrincipal = 'El color principal no puede ser igual al color secundario'
     if (!colorSecundario) e.colorSecundario = 'Por favor seleccione un color secundario'
-    else if (colorSecundario === colorPrincipal)
-      e.colorSecundario = 'El color secundario no puede ser igual al color principal'
     if (!semestre) e.semestre = 'Por favor seleccione un semestre válido'
     return e
   }
 
   const handleSubmit = async () => {
-    setSubmitted(true)
     const e = validar()
     if (Object.keys(e).length > 0) {
       setErrores(e)
       return
     }
-    if (!user) {
-      setPopupMensaje('❌ No hay sesión activa. Por favor inicia sesión nuevamente')
-      setShowPopup(true)
-      return
-    }
+    if (!user) return
     setLoading(true)
     setErrores({})
     try {
@@ -75,24 +60,18 @@ const TeamRegisterPage = () => {
       setColorPrincipal('')
       setColorSecundario('')
       setSemestre('')
-      setEscudoArchivo(null)
-      setSubmitted(false)
-      setPopupMensaje('✅ Equipo creado correctamente')
-      setShowPopup(true)
     } catch (err: unknown) {
       const axiosError = err as { response?: { data?: { detalle?: string } } }
-      const msg = axiosError.response?.data?.detalle || 'Error al registrar el equipo'
-      setPopupMensaje(`❌ Error al crear el equipo: ${msg}`)
-      setShowPopup(true)
+      setErrores({
+        general: axiosError.response?.data?.detalle || 'Error al registrar el equipo',
+      })
     } finally {
       setLoading(false)
     }
   }
 
-  const erroresActuales = submitted ? validar() : {}
-
   return (
-    <>
+    <div>
       {/* Banner */}
       <div style={{ backgroundColor: '#11823B', padding: '2rem', textAlign: 'center' }}>
         <h1 style={{ color: '#ffffff', margin: 0, fontSize: '2rem', fontWeight: 'bold' }}>
@@ -124,18 +103,7 @@ const TeamRegisterPage = () => {
 
           {/* Escudo */}
           <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
-            <input
-              ref={escudoInputRef}
-              type="file"
-              accept=".jpg,.jpeg,.png"
-              style={{ display: 'none' }}
-              onChange={e => {
-                const file = e.target.files?.[0] ?? null
-                setEscudoArchivo(file)
-              }}
-            />
             <div
-              onClick={() => escudoInputRef.current?.click()}
               style={{
                 width: '80px',
                 height: '80px',
@@ -157,7 +125,6 @@ const TeamRegisterPage = () => {
               </p>
             )}
             <p
-              onClick={() => escudoInputRef.current?.click()}
               style={{
                 color: '#11823B',
                 fontSize: '0.8rem',
@@ -167,30 +134,6 @@ const TeamRegisterPage = () => {
             >
               ⬆ Subir Escudo
             </p>
-            {escudoArchivo && (
-              <div style={{ marginTop: '0.4rem' }}>
-                <p style={{ color: '#11823B', fontSize: '0.8rem', margin: 0 }}>
-                  {escudoArchivo.name}
-                </p>
-                <button
-                  onClick={() => {
-                    setEscudoArchivo(null)
-                    if (escudoInputRef.current) escudoInputRef.current.value = ''
-                  }}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: '#E53E3E',
-                    fontSize: '0.8rem',
-                    cursor: 'pointer',
-                    padding: 0,
-                    marginTop: '0.2rem',
-                  }}
-                >
-                  ✕ Descartar
-                </button>
-              </div>
-            )}
           </div>
 
           {/* Nombre */}
@@ -207,14 +150,14 @@ const TeamRegisterPage = () => {
                 width: '100%',
                 boxSizing: 'border-box',
                 padding: '0.5rem',
-                border: `1px solid ${erroresActuales.nombre ? '#ef4444' : '#D9D9D9'}`,
+                border: `1px solid ${errores.nombre ? '#ef4444' : '#D9D9D9'}`,
                 borderRadius: '4px',
                 fontSize: '0.85rem',
               }}
             />
-            {erroresActuales.nombre && (
+            {errores.nombre && (
               <p style={{ color: '#ef4444', fontSize: '0.75rem', margin: '0.25rem 0 0' }}>
-                {erroresActuales.nombre}
+                {errores.nombre}
               </p>
             )}
           </div>
@@ -245,9 +188,9 @@ const TeamRegisterPage = () => {
                     />
                   ))}
                 </div>
-                {erroresActuales.colorPrincipal && (
+                {errores.colorPrincipal && (
                   <p style={{ color: '#ef4444', fontSize: '0.75rem', margin: '0.25rem 0 0' }}>
-                    {erroresActuales.colorPrincipal}
+                    {errores.colorPrincipal}
                   </p>
                 )}
               </div>
@@ -271,9 +214,9 @@ const TeamRegisterPage = () => {
                     />
                   ))}
                 </div>
-                {erroresActuales.colorSecundario && (
+                {errores.colorSecundario && (
                   <p style={{ color: '#ef4444', fontSize: '0.75rem', margin: '0.25rem 0 0' }}>
-                    {erroresActuales.colorSecundario}
+                    {errores.colorSecundario}
                   </p>
                 )}
               </div>
@@ -292,7 +235,7 @@ const TeamRegisterPage = () => {
                 width: '100%',
                 boxSizing: 'border-box',
                 padding: '0.5rem',
-                border: `1px solid ${erroresActuales.semestre ? '#ef4444' : '#D9D9D9'}`,
+                border: `1px solid ${errores.semestre ? '#ef4444' : '#D9D9D9'}`,
                 borderRadius: '4px',
                 fontSize: '0.85rem',
               }}
@@ -304,30 +247,30 @@ const TeamRegisterPage = () => {
                 </option>
               ))}
             </select>
-            {erroresActuales.semestre && (
+            {errores.semestre && (
               <p style={{ color: '#ef4444', fontSize: '0.75rem', margin: '0.25rem 0 0' }}>
-                {erroresActuales.semestre}
+                {errores.semestre}
               </p>
             )}
           </div>
 
+          {errores.general && (
+            <p style={{ color: '#ef4444', fontSize: '0.8rem', marginBottom: '1rem' }}>
+              {errores.general}
+            </p>
+          )}
+
           <button
             onClick={handleSubmit}
-            disabled={loading || (submitted && Object.keys(erroresActuales).length > 0)}
+            disabled={loading}
             style={{
               width: '100%',
               padding: '0.75rem',
-              backgroundColor:
-                loading || (submitted && Object.keys(erroresActuales).length > 0)
-                  ? '#737373'
-                  : '#11823B',
+              backgroundColor: loading ? '#737373' : '#11823B',
               color: '#ffffff',
               border: 'none',
               borderRadius: '4px',
-              cursor:
-                loading || (submitted && Object.keys(erroresActuales).length > 0)
-                  ? 'not-allowed'
-                  : 'pointer',
+              cursor: loading ? 'not-allowed' : 'pointer',
               fontSize: '0.9rem',
               marginBottom: '0.5rem',
             }}
@@ -416,56 +359,7 @@ const TeamRegisterPage = () => {
           )}
         </div>
       </div>
-
-      {/* Popup */}
-      {showPopup && (
-        <>
-          <div
-            onClick={() => setShowPopup(false)}
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              backgroundColor: 'rgba(0,0,0,0.3)',
-              zIndex: 999,
-            }}
-          />
-          <div
-            style={{
-              position: 'fixed',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              backgroundColor: 'white',
-              borderRadius: '8px',
-              padding: '1.5rem 2rem',
-              textAlign: 'center',
-              zIndex: 1000,
-              minWidth: '260px',
-            }}
-          >
-            <p style={{ fontWeight: 'bold', fontSize: '0.95rem', margin: '0 0 1rem 0' }}>
-              {popupMensaje}
-            </p>
-            <button
-              onClick={() => setShowPopup(false)}
-              style={{
-                backgroundColor: '#11823B',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                padding: '0.5rem 1.5rem',
-                cursor: 'pointer',
-              }}
-            >
-              Cerrar
-            </button>
-          </div>
-        </>
-      )}
-    </>
+    </div>
   )
 }
 
