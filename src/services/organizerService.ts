@@ -103,6 +103,26 @@ export interface PendingPayment {
   estado: string
 }
 
+export interface GroupStandingRow {
+  equipo: string
+  pj: number
+  pg: number
+  pe: number
+  pp: number
+  gf: number
+  gc: number
+  pts: number
+}
+
+export interface BracketMatch {
+  id: string
+  local: string
+  visitante: string
+  marcador: string
+  estado: string
+  fecha: string | null
+}
+
 export interface MatchResultPayload {
   golesLocal: number
   golesVisitante: number
@@ -195,6 +215,8 @@ const toNumberValue = (value: unknown, fallback = 0): number => {
   }
   return fallback
 }
+
+const isArrayOfUnknown = (value: unknown): value is unknown[] => Array.isArray(value)
 
 const normalizeLookup = (value: string): string =>
   value
@@ -314,6 +336,20 @@ const resolveOrganizerIdentity = async (): Promise<OrganizerIdentity> => {
       normalizeLookup(organizerIdentityCache.email) === normalizeLookup(currentEmail))
   ) {
     return organizerIdentityCache
+  }
+
+  try {
+    const meResponse = await apiClient.get('/api/users/me')
+    const me = isObject(meResponse.data) ? meResponse.data : {}
+    const meId = toStringValue(me.id ?? me.userId).trim()
+    const meEmail = toStringValue(me.email ?? me.correo ?? currentEmail ?? '').trim()
+    if (meId) {
+      const resolved = { id: meId, email: meEmail }
+      organizerIdentityCache = resolved
+      return resolved
+    }
+  } catch {
+    // Fallback to organizer listing when /me is not available.
   }
 
   const response = await callGetWithFallback(['/api/users/organizers'])
@@ -626,6 +662,99 @@ const normalizePayment = (item: unknown): PendingPayment => {
   }
 }
 
+const normalizeGroupStandingRow = (item: unknown): GroupStandingRow | null => {
+  const row = isObject(item) ? item : null
+  if (!row) return null
+
+  const team = toStringValue(row.equipo ?? row.team ?? row.nombreEquipo, '').trim()
+  if (!team) return null
+
+  return {
+    equipo: team,
+    pj: toNumberValue(row.pj ?? row.jugados),
+    pg: toNumberValue(row.pg ?? row.ganados),
+    pe: toNumberValue(row.pe ?? row.empatados),
+    pp: toNumberValue(row.pp ?? row.perdidos),
+    gf: toNumberValue(row.gf ?? row.golesFavor),
+    gc: toNumberValue(row.gc ?? row.golesContra),
+    pts: toNumberValue(row.pts ?? row.puntos),
+  }
+}
+
+const normalizeBracketMatch = (item: unknown): BracketMatch | null => {
+  const match = isObject(item) ? item : null
+  if (!match) return null
+
+  const id = toStringValue(match.partidoId ?? match.id ?? match.matchId)
+  const local = toStringValue(match.local ?? match.equipoLocal ?? match.homeTeam, 'Por definir')
+  const visitante = toStringValue(
+    match.visitante ?? match.equipoVisitante ?? match.awayTeam,
+    'Por definir'
+  )
+
+  return {
+    id: id || `${local}-${visitante}-${toStringValue(match.fecha, 'na')}`,
+    local,
+    visitante,
+    marcador: toStringValue(match.marcador ?? match.score, '0 - 0'),
+    estado: toStringValue(match.estado ?? match.status, 'PROGRAMADO'),
+    fecha: toNullableString(match.fecha ?? match.date),
+  }
+}
+
+const extractTeamNameFromUnknown = (value: unknown): string => {
+  if (typeof value === 'string') {
+    return value.trim()
+  }
+  if (!isObject(value)) {
+    return ''
+  }
+  return toStringValue(
+    value.nombre ?? value.name ?? value.equipo ?? value.team ?? value.equipoNombre ?? value.teamName
+  ).trim()
+}
+
+const extractTeamNamesFromUnknown = (value: unknown): string[] => {
+  const names = new Set<string>()
+  const pushName = (raw: unknown) => {
+    const name = extractTeamNameFromUnknown(raw)
+    if (!name) return
+    names.add(name)
+  }
+
+  if (isArrayOfUnknown(value)) {
+    value.forEach(item => pushName(item))
+    return Array.from(names)
+  }
+
+  if (!isObject(value)) {
+    return []
+  }
+
+  const directCandidates = [
+    value.equipos,
+    value.teams,
+    value.equiposInscritos,
+    value.participantes,
+    value.participants,
+    value.inscritos,
+    value.data,
+  ]
+  directCandidates.forEach(candidate => {
+    if (isArrayOfUnknown(candidate)) {
+      candidate.forEach(item => pushName(item))
+    }
+  })
+
+  Object.values(value).forEach(inner => {
+    if (isArrayOfUnknown(inner)) {
+      inner.forEach(item => pushName(item))
+    }
+  })
+
+  return Array.from(names)
+}
+
 const callGetWithFallback = async (urls: string[]) => {
   let lastError: unknown = null
   for (const url of urls) {
@@ -686,16 +815,33 @@ const callPatchWithFallback = async (urls: string[], payload?: unknown) => {
   throw lastError
 }
 
-const callPatchWithPayloadVariants = async (urls: string[], payloads: unknown[]) => {
+const callDeleteWithFallback = async (urls: string[]) => {
   let lastError: unknown = null
-  for (const payload of payloads) {
+  for (const url of urls) {
     try {
-      return await callPatchWithFallback(urls, payload)
+      return await apiClient.delete(url)
     } catch (error) {
       lastError = error
     }
   }
   throw lastError
+}
+
+const buildMissingEndpointError = (fallback: string): Error => {
+  return new Error(`${fallback} Endpoint faltante en backend para rol organizador.`)
+}
+
+const isNotFoundError = (error: unknown): boolean => {
+  if (!isObject(error)) return false
+  const response = isObject(error.response) ? error.response : null
+  return response?.status === 404
+}
+
+const shouldFallbackForMissingEndpoint = (error: unknown): boolean => {
+  if (!isObject(error)) return false
+  const response = isObject(error.response) ? error.response : null
+  const status = response?.status
+  return status === 404 || status === 405 || status === 501
 }
 
 export const extractApiErrorMessage = (error: unknown, fallback: string): string => {
@@ -725,16 +871,49 @@ export const extractApiErrorMessage = (error: unknown, fallback: string): string
 }
 
 export const listarTorneosOrganizador = async (): Promise<OrganizerTournament[]> => {
-  const response = await callGetWithFallback([
+  const organizerId = await resolveOrganizerId()
+  try {
+    const response = await apiClient.get(`/api/users/organizers/${organizerId}/tournaments`)
+    const list = pickList(response.data, ['content', 'items', 'torneos', 'tournaments', 'data'])
+    return list.map(normalizeTournament).filter(torneo => torneo.id !== '')
+  } catch (error) {
+    if (!shouldFallbackForMissingEndpoint(error)) {
+      throw error
+    }
+  }
+
+  const fallbackResponse = await callGetWithFallback([
     '/api/tournaments',
     '/api/tournaments/organizer',
     '/api/tournaments/managed',
   ])
-  const list = pickList(response.data, ['content', 'items', 'torneos', 'tournaments', 'data'])
-  return list.map(normalizeTournament).filter(torneo => torneo.id !== '')
+  const fallbackList = pickList(fallbackResponse.data, [
+    'content',
+    'items',
+    'torneos',
+    'tournaments',
+    'data',
+  ])
+  return fallbackList.map(normalizeTournament).filter(torneo => torneo.id !== '')
 }
 
 export const obtenerResumenOrganizador = async (): Promise<OrganizerSummary> => {
+  const organizerId = await resolveOrganizerId()
+  try {
+    const response = await apiClient.get(`/api/users/organizers/${organizerId}/summary`)
+    const summary = isObject(response.data) ? response.data : {}
+    return {
+      torneosActivos: toNumberValue(summary.torneosActivos ?? summary.activeTournaments),
+      equiposInscritos: toNumberValue(summary.equiposInscritos ?? summary.registeredTeams),
+      partidosJugados: toNumberValue(summary.partidosJugados ?? summary.matchesPlayed),
+      pagosPendientes: toNumberValue(summary.pagosPendientes ?? summary.pendingPayments),
+    }
+  } catch (error) {
+    if (!shouldFallbackForMissingEndpoint(error)) {
+      throw error
+    }
+  }
+
   try {
     const response = await callGetWithFallback([
       '/api/tournaments/organizer/summary',
@@ -806,11 +985,17 @@ export const crearTorneo = async (
 }
 
 export const obtenerTorneo = async (torneoId: string): Promise<OrganizerTournament> => {
-  const response = await callGetWithFallback([
-    `/api/tournaments/${torneoId}`,
-    `/api/tournaments/organizer/${torneoId}`,
-  ])
-  return normalizeTournament(response.data)
+  try {
+    const response = await apiClient.get(`/api/tournaments/${torneoId}`)
+    return normalizeTournament(response.data)
+  } catch (error) {
+    if (!shouldFallbackForMissingEndpoint(error)) {
+      throw error
+    }
+  }
+
+  const fallbackResponse = await callGetWithFallback([`/api/tournaments/organizer/${torneoId}`])
+  return normalizeTournament(fallbackResponse.data)
 }
 
 export const obtenerConfiguracionTorneo = async (
@@ -836,6 +1021,7 @@ export const guardarConfiguracionTorneo = async (
       : '')
 
   const backendPayload = {
+    torneoId,
     reglamento: payload.reglamento,
     cierreInscripciones: closeDateRaw ? normalizeDateTimeString(closeDateRaw, 'start') : '',
     canchas: payload.canchas.join(', '),
@@ -843,48 +1029,66 @@ export const guardarConfiguracionTorneo = async (
     sanciones: payload.sanciones.join(', '),
   }
 
-  try {
-    await callPatchWithPayloadVariants(
-      [
-        `/api/users/organizers/${organizerId}/tournament/configure`,
-        `/api/tournaments/${torneoId}/configuration`,
-        `/api/tournaments/${torneoId}/settings`,
-      ],
-      [backendPayload, payload]
-    )
-  } catch {
-    await callPutWithFallback(
-      [`/api/tournaments/${torneoId}/configuration`, `/api/tournaments/${torneoId}/settings`],
-      payload
-    )
+  const configureEndpoints = [
+    `/api/users/organizers/${organizerId}/tournaments/${torneoId}/configure`,
+    `/api/users/organizers/${organizerId}/tournament/configure`,
+  ]
+
+  for (const endpoint of configureEndpoints) {
+    try {
+      await apiClient.patch(endpoint, backendPayload)
+      return
+    } catch (error) {
+      if (!shouldFallbackForMissingEndpoint(error)) {
+        throw error
+      }
+    }
   }
+
+  await callPutWithFallback(
+    [`/api/tournaments/${torneoId}/configuration`, `/api/tournaments/${torneoId}/settings`],
+    payload
+  )
 }
 
 const executeTournamentTransition = async (
-  organizerEndpoint: string,
+  preferredEndpoints: string[],
   legacyEndpoints: string[]
 ) => {
-  try {
-    await callPatchWithFallback([organizerEndpoint])
-  } catch {
-    await callPostWithFallback(legacyEndpoints)
+  for (const endpoint of preferredEndpoints) {
+    try {
+      await apiClient.patch(endpoint)
+      return
+    } catch (error) {
+      if (!shouldFallbackForMissingEndpoint(error)) {
+        throw error
+      }
+    }
   }
+
+  await callPostWithFallback(legacyEndpoints)
 }
 
 export const iniciarTorneo = async (torneoId: string): Promise<void> => {
   const organizerId = await resolveOrganizerId()
-  await executeTournamentTransition(`/api/users/organizers/${organizerId}/tournament/start`, [
-    `/api/tournaments/${torneoId}/start`,
-    `/api/tournaments/${torneoId}/iniciar`,
-  ])
+  await executeTournamentTransition(
+    [
+      `/api/users/organizers/${organizerId}/tournaments/${torneoId}/start`,
+      `/api/users/organizers/${organizerId}/tournament/start`,
+    ],
+    [`/api/tournaments/${torneoId}/start`, `/api/tournaments/${torneoId}/iniciar`]
+  )
 }
 
 export const finalizarTorneo = async (torneoId: string): Promise<void> => {
   const organizerId = await resolveOrganizerId()
-  await executeTournamentTransition(`/api/users/organizers/${organizerId}/tournament/end`, [
-    `/api/tournaments/${torneoId}/finish`,
-    `/api/tournaments/${torneoId}/finalizar`,
-  ])
+  await executeTournamentTransition(
+    [
+      `/api/users/organizers/${organizerId}/tournaments/${torneoId}/end`,
+      `/api/users/organizers/${organizerId}/tournament/end`,
+    ],
+    [`/api/tournaments/${torneoId}/finish`, `/api/tournaments/${torneoId}/finalizar`]
+  )
 }
 
 export const listarPartidosTorneo = async (torneoId: string): Promise<Match[]> => {
@@ -923,21 +1127,23 @@ export const registrarPartido = async (
     cancha: payload.cancha.trim(),
   }
 
-  const response = await callPostWithPayloadVariants(
-    [`/api/users/organizers/${organizerId}/matches`, `/api/tournaments/${torneoId}/matches`],
-    [backendPayload, payload]
+  try {
+    const response = await callPostWithFallback(
+      [`/api/users/organizers/${organizerId}/matches`],
+      backendPayload
+    )
+    return normalizeMatch(response.data)
+  } catch (error) {
+    if (!shouldFallbackForMissingEndpoint(error)) {
+      throw error
+    }
+  }
+
+  const fallbackResponse = await callPostWithFallback(
+    [`/api/tournaments/${torneoId}/matches`],
+    payload
   )
-  return normalizeMatch(response.data)
-}
-
-const buildMissingEndpointError = (fallback: string): Error => {
-  return new Error(`${fallback} Endpoint faltante en backend para rol organizador.`)
-}
-
-const isNotFoundError = (error: unknown): boolean => {
-  if (!isObject(error)) return false
-  const response = isObject(error.response) ? error.response : null
-  return response?.status === 404
+  return normalizeMatch(fallbackResponse.data)
 }
 
 export const guardarResultadoPartido = async (
@@ -1010,7 +1216,29 @@ export const agregarSancionPartido = async (
 }
 
 export const listarPagosPendientes = async (torneoId: string): Promise<PendingPayment[]> => {
-  void torneoId
+  const organizerId = await resolveOrganizerId()
+
+  try {
+    const filteredResponse = await apiClient.get(
+      `/api/users/organizers/${organizerId}/payments/pending`,
+      {
+        params: { tournamentId: torneoId },
+      }
+    )
+    const filteredList = pickList(filteredResponse.data, [
+      'content',
+      'items',
+      'payments',
+      'pagos',
+      'data',
+    ])
+    return filteredList.map(normalizePayment).filter(payment => payment.id !== '')
+  } catch (error) {
+    if (!shouldFallbackForMissingEndpoint(error)) {
+      throw error
+    }
+  }
+
   const teams = await loadTeams()
   const captainById = new Map<string, string>()
 
@@ -1076,7 +1304,6 @@ export const listarPagosPendientes = async (torneoId: string): Promise<PendingPa
     }
   }
 
-  const organizerId = await resolveOrganizerId()
   const fallbackResponse = await callGetWithFallback([
     `/api/users/organizers/${organizerId}/payments/pending`,
     `/api/tournaments/payments/pending`,
@@ -1122,6 +1349,50 @@ export const rechazarPago = async (torneoId: string, pagoId: string): Promise<vo
       `/api/tournaments/${torneoId}/pagos/${pagoId}/rechazar`,
       `/api/payments/${pagoId}/reject`,
     ])
+  }
+}
+
+export const obtenerTablaPosicionesTorneo = async (
+  torneoId: string
+): Promise<GroupStandingRow[]> => {
+  const response = await callGetWithFallback([`/api/tournaments/${torneoId}/positions`])
+  const list = pickList(response.data, ['content', 'items', 'positions', 'tabla', 'data'])
+  return list.map(normalizeGroupStandingRow).filter((row): row is GroupStandingRow => row !== null)
+}
+
+export const listarEquiposInscritosTorneo = async (torneoId: string): Promise<string[]> => {
+  const response = await callGetWithFallback([`/api/tournaments/${torneoId}/enrollment`])
+  return extractTeamNamesFromUnknown(response.data)
+}
+
+export const obtenerLlaveEliminatoriaTorneo = async (torneoId: string): Promise<BracketMatch[]> => {
+  const response = await callGetWithFallback([`/api/tournaments/${torneoId}/bracket`])
+  const list = pickList(response.data, ['content', 'items', 'matches', 'bracket', 'data'])
+  const dynamicRounds =
+    list.length > 0
+      ? []
+      : isObject(response.data)
+        ? Object.values(response.data).flatMap(value => (isArrayOfUnknown(value) ? value : []))
+        : []
+  const unifiedList = list.length > 0 ? list : dynamicRounds
+  return unifiedList
+    .map(normalizeBracketMatch)
+    .filter((match): match is BracketMatch => match !== null)
+}
+
+export const eliminarTorneo = async (torneoId: string): Promise<void> => {
+  const organizerId = await resolveOrganizerId()
+  try {
+    await callDeleteWithFallback([
+      `/api/users/organizers/${organizerId}/tournament/${torneoId}`,
+      `/api/tournaments/${torneoId}`,
+      `/api/tournaments/${torneoId}/delete`,
+    ])
+  } catch (error) {
+    if (isNotFoundError(error)) {
+      throw buildMissingEndpointError('No se pudo eliminar el torneo.')
+    }
+    throw error
   }
 }
 

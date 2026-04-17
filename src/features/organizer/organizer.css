@@ -84,6 +84,11 @@
   color: #ffffff;
 }
 
+.organizer-btn-danger {
+  background-color: #c62828;
+  color: #ffffff;
+}
+
 .organizer-btn-muted {
   background-color: #ffffff;
   border: 1px solid #c3c3c3;
@@ -264,6 +269,12 @@
   background-color: #ffe4e2;
   color: #8f1f13;
   border: 1px solid #f4b5af;
+}
+
+.organizer-message-info {
+  background-color: #e6f0ff;
+  color: #1f4c8f;
+  border: 1px solid #bcd3ff;
 }
 
 .organizer-header-row {
