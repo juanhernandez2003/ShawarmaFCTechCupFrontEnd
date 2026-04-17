@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import apiClient from '../../services/apiClient'
 import useAuthStore from '../../store/authStore'
@@ -62,7 +62,7 @@ const AuditoriaPage = () => {
   const [filtroTipo, setFiltroTipo] = useState('')
   const [filtroFecha, setFiltroFecha] = useState('')
 
-  const fetchAuditoria = () => {
+  const fetchAuditoria = useCallback(() => {
     if (!user) return
     setLoading(true)
     setError(null)
@@ -79,11 +79,12 @@ const AuditoriaPage = () => {
       })
       .catch(() => setError('Error al cargar la auditoría'))
       .finally(() => setLoading(false))
-  }
+  }, [user, filtroUsuario, filtroTipo])
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchAuditoria()
-  }, [])
+  }, [fetchAuditoria])
 
   const registrosFiltrados = registros.filter(r => {
     if (filtroFecha && !r.fecha?.startsWith(filtroFecha)) return false
